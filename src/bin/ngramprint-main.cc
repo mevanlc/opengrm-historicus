@@ -1,5 +1,5 @@
 // Copyright 2005-2013 Brian Roark
-// Copyright 2005-2020 Google LLC
+// Copyright 2005-2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the 'License');
 // you may not use this file except in compliance with the License.
@@ -75,6 +75,14 @@ int ngramprint_main(int argc, char **argv) {
     }
   }
   std::ostream &ostrm = ofstrm.is_open() ? ofstrm : std::cout;
+
+  if (FST_FLAGS_ARPA &&
+      (FST_FLAGS_negativelogs || FST_FLAGS_integers)) {
+    LOG(ERROR) << "Printing in ARPA format writes weights as log_{10} "
+               << "probabilities. --ARPA cannot be used with "
+               << "the --negativelogs and --integers flags.";
+    return 1;
+  }
 
   ngram::NGramOutput ngram(fst.get(), ostrm, FST_FLAGS_backoff_label,
                            FST_FLAGS_check_consistency,

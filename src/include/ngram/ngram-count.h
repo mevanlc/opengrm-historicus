@@ -1,5 +1,5 @@
 // Copyright 2005-2013 Brian Roark
-// Copyright 2005-2020 Google LLC
+// Copyright 2005-2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the 'License');
 // you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@
 #include <fst/log.h>
 #include <fst/extensions/far/far.h>
 #include <fst/arc.h>
+#include <fst/connect.h>
 #include <fst/fst.h>
 #include <fst/fstlib.h>
 #include <fst/mutable-fst.h>
@@ -56,8 +57,8 @@ class NGramCounter {
         epsilon_as_backoff_(epsilon_as_backoff),
         delta_(delta),
         error_(false) {
-    if (order == 0) {
-      NGRAMERROR() << "order must be greater than 0";
+    if (order < 1) {
+      NGRAMERROR() << "NGramCounter: order must be positive";
       SetError();
       return;
     }
@@ -71,12 +72,14 @@ class NGramCounter {
     }
   }
 
-  // Extract counts from the input acyclic Fst.  Return 'true' when
-  // the counting from the Fst was successful and false otherwise.
+  // Extract counts from the input acyclic FST.  Return 'true' if counting
+  // from the FST was successful and false otherwise. If necessary, a copy is
+  // taken and this is sent to the MutableFst overload.
   template <class Arc>
   bool Count(const fst::Fst<Arc> &fst) {
     if (Error()) return false;
-    if (fst.Properties(fst::kString, false)) {
+    if (fst.Start() == fst::kNoStateId) return false;
+    if (fst.Properties(fst::kString, false) == fst::kString) {
       return CountFromStringFst(fst);
     } else if (fst.Properties(fst::kTopSorted, true)) {
       return CountFromTopSortedFst(fst);
@@ -86,22 +89,29 @@ class NGramCounter {
     }
   }
 
-  // Extract counts from input mutable acyclic Fst, top sort the input
-  // fst in place when needed.  Return 'true' when the counting from
+  // Extract counts from input mutable acyclic FST, top-sorting the input FST
+  // if necessary. Returns 'true' when the counting from
   // the Fst was successful and false otherwise.
   template <class Arc>
   bool Count(fst::MutableFst<Arc> *fst) {
-    if (Error()) {
-      return false;
-    }
-    if (fst->Properties(fst::kString, true)) {
+    if (Error()) return false;
+    if (fst->Start() == fst::kNoStateId) return false;
+    if (fst->Properties(fst::kString, true) == fst::kString) {
       return CountFromStringFst(*fst);
     }
-    bool acyclic = TopSort(fst);
-    if (!acyclic) {
-      // TODO(allauzen): support key in error message.
-      LOG(ERROR) << "NGramCounter::Count: input not an acyclic fst";
-      return false;
+    if (fst->Properties(fst::kCoAccessible, true) !=
+        fst::kCoAccessible) {
+      LOG(WARNING) << "NGramCounter::Count: input FST is not coaccessible";
+      fst::Connect(fst);
+      // The FSA could be fully coinaccessible.
+      if (fst->Start() == fst::kNoStateId) return false;
+    }
+    if (fst->Properties(fst::kTopSorted, true) != fst::kTopSorted) {
+      if (!fst::TopSort(fst)) {
+        // TODO(allauzen): support key in error message.
+        LOG(ERROR) << "NGramCounter::Count: input FST is not acyclic";
+        return false;
+      }
     }
     return CountFromTopSortedFst(*fst);
   }
@@ -175,7 +185,7 @@ class NGramCounter {
       if (arcs_[count_state.first_arc].label == label)
         return count_state.first_arc;
       const PairArcMap &arc_map = pair_arc_maps_[count_state.order - 1];
-      auto iter = arc_map.find(std::make_pair(label, state_id));
+      const auto iter = arc_map.find(std::make_pair(label, state_id));
       if (iter != arc_map.end()) return iter->second;
     }
     // Otherwise, this arc needs to be created.
@@ -277,27 +287,23 @@ class NGramCounter {
   // Creates the arc corresponding to label 'label' out of the state
   // with ID 'state_id'.
   size_t AddArc(ssize_t state_id, Label label) {
-    CountState count_state = states_[state_id];
-    ssize_t arc_id = arcs_.size();
-
+    const auto count_state = states_[state_id];
+    const ssize_t arc_id = arcs_.size();
     // Updates the hash entry for the new arc.
     if (count_state.first_arc == -1) {
       states_[state_id].first_arc = arc_id;
     } else {
-      pair_arc_maps_[count_state.order - 1].insert(
-          std::make_pair(std::make_pair(label, state_id), arc_id));
+      pair_arc_maps_[count_state.order - 1].emplace(
+          std::make_pair(label, state_id), arc_id);
     }
-
     // Pre-fills arc with values valid when order_ == 1 and returns
     // if nothing else needs to be done.
-    arcs_.push_back(CountArc(state_id, initial_, label, Weight::Zero(), -1));
+    arcs_.emplace_back(state_id, initial_, label, Weight::Zero(), -1);
     if (order_ == 1) return arc_id;
-
     // First compute the backoff arc
-    ssize_t backoff_arc = count_state.backoff_state == -1
-                              ? -1
-                              : FindArc(count_state.backoff_state, label);
-
+    const ssize_t backoff_arc = count_state.backoff_state == -1
+                                    ? -1
+                                    : FindArc(count_state.backoff_state, label);
     // Second compute the destination state.
     ssize_t destination;
     if (count_state.order == order_) {
@@ -321,7 +327,7 @@ class NGramCounter {
   // out of state of ID 'state_id' by 'count'.
   ssize_t UpdateCount(ssize_t state_id, Label label, Weight count) {
     ssize_t arc_id = FindArc(state_id, label);
-    ssize_t nextstate_id = arcs_[arc_id].destination;
+    const ssize_t nextstate_id = arcs_[arc_id].destination;
     while (arc_id != -1) {
       arcs_[arc_id].count = Plus(arcs_[arc_id].count, count);
       arc_id = arcs_[arc_id].backoff_arc;
@@ -413,7 +419,7 @@ bool NGramCounter<Weight, Label>::CountFromStringFst(
     if (arc.ilabel) {
       count_state = UpdateCount(count_state, arc.ilabel, weight);
     } else if (epsilon_as_backoff_) {
-      ssize_t next_count_state = NGramBackoffState(count_state);
+      const ssize_t next_count_state = NGramBackoffState(count_state);
       count_state = next_count_state == -1 ? count_state : next_count_state;
     }
     fst_state = arc.nextstate;
@@ -449,9 +455,9 @@ bool NGramCounter<Weight, Label>::CountFromTopSortedFst(
   size_t i = 0;
   while (!heap.empty()) {
     std::pop_heap(heap.begin(), heap.end(), compare);
-    Pair current_pair = heap.back();
-    auto fst_state = current_pair.first;
-    ssize_t count_state = current_pair.second;
+    const auto current_pair = heap.back();
+    const auto fst_state = current_pair.first;
+    const ssize_t count_state = current_pair.second;
     auto current_weight = pair2weight[current_pair];
     pair2weight.erase(current_pair);
     heap.pop_back();
@@ -466,12 +472,12 @@ bool NGramCounter<Weight, Label>::CountFromTopSortedFst(
                                     fdistance[arc.nextstate])).Value();
         next_pair.second = UpdateCount(count_state, arc.ilabel, count.Value());
       } else if (epsilon_as_backoff_) {
-        ssize_t next_count_state = NGramBackoffState(count_state);
+        const ssize_t next_count_state = NGramBackoffState(count_state);
         next_pair.second =
             next_count_state == -1 ? count_state : next_count_state;
       }
-      typename Arc::Weight next_weight = Times(current_weight, arc.weight);
-      auto iter = pair2weight.find(next_pair);
+      const auto next_weight = Times(current_weight, arc.weight);
+      const auto iter = pair2weight.find(next_pair);
       if (iter == pair2weight.end()) {  // If pair not in heap, inserts it.
         pair2weight[next_pair] = next_weight;
         heap.push_back(next_pair);
@@ -514,7 +520,7 @@ void GetNGramCountOfCounts(const fst::Fst<Arc> &fst,
                            fst::StdMutableFst *ccfst, int in_order,
                            std::string_view context_pattern) {
   NGramModel<Arc> ngram(fst, 0, kNormEps, !context_pattern.empty());
-  int order = ngram.HiOrder() > in_order ? ngram.HiOrder() : in_order;
+  const auto order = ngram.HiOrder() > in_order ? ngram.HiOrder() : in_order;
   NGramCountOfCounts<Arc> count_of_counts(context_pattern, order);
   count_of_counts.CalculateCounts(ngram);
   count_of_counts.GetFst(ccfst);

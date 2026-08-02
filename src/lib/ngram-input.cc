@@ -1,5 +1,5 @@
 // Copyright 2005-2013 Brian Roark
-// Copyright 2005-2020 Google LLC
+// Copyright 2005-2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the 'License');
 // you may not use this file except in compliance with the License.
@@ -180,8 +180,7 @@ typename NGramInput::Label NGramInput::GetNGramLabel(
 
 // Iterates through words in the n-gram history to find current state.
 typename NGramInput::StateId NGramInput::GetHistoryState(
-    const std::vector<std::string> &words,
-    const std::vector<Label> &last_labels,
+    const std::vector<std::string> &words, const std::vector<Label> &last_labels,
     const std::vector<StateId> &last_states, StateId st) {
   for (auto i = 0; i < words.size() - 2; ++i) {
     bool stsym;

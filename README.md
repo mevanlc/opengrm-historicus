@@ -4,7 +4,7 @@ This is a C++ library for making and modifying n-gram language models encoded as
 weighted finite-state transducers. It uses OpenFst finite-state transducers
 (FSTs) and FST archives (FARs) as inputs and outputs.
 
-This library is primarily developed by [Brian Roark](mailto:roark@google.com)
+This library is primarily developed by [Brian Roark](mailto:roark@google.com).
 
 ## Dependencies
 
@@ -28,7 +28,7 @@ by running `bazel build //:all` anywhere in the source tree.
 *   Libraries will normally be installed in `/usr/local/lib`
 *   Headers will normally be installed in `/usr/local/include/ngram`
 
-Linking is, by default, dynamic so that the`Fst` and `Arc` type DSO extensions
+Linking is, by default, dynamic so that the `Fst` and `Arc` type DSO extensions
 can be used correctly if desired.
 
 ## Documentation

@@ -1,4 +1,4 @@
-AC_INIT([NGram],[1.3.15],[ngram@www.opengrm.org])
+AC_INIT([NGram],[1.3.16],[ngram@www.opengrm.org])
 AM_INIT_AUTOMAKE([foreign nostdinc -Wall -Werror])
 AM_PROG_AR
 
@@ -8,7 +8,7 @@ AC_PROG_CXX
 CXX="$CXX -std=c++17 -fno-exceptions"
 
 AC_DISABLE_STATIC
-LT_INIT
+AC_PROG_LIBTOOL
 
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_SRCDIR([src/include/ngram/ngram-model.h])
