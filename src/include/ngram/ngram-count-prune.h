@@ -19,7 +19,11 @@
 #define NGRAM_NGRAM_COUNT_PRUNE_H_
 
 #include <string>
+#include <vector>
 
+#include <fst/arc.h>
+#include <fst/mutable-fst.h>
+#include <ngram/ngram-model.h>
 #include <ngram/ngram-shrink.h>
 
 namespace ngram {
@@ -63,7 +67,7 @@ class NGramCountPrune : public NGramShrink<fst::StdArc> {
     }
   }
 
-  ~NGramCountPrune() override {}
+  ~NGramCountPrune() override = default;
 
   // Shrinks n-gram model, based on initialized parameters
   bool ShrinkNGramModel(int min_order = 2) {

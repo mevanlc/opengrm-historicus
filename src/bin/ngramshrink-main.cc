@@ -15,11 +15,16 @@
 //
 // Shrinks an input n-gram model using given pruning criteria.
 
+#include <cstring>
 #include <fstream>
 #include <memory>
+#include <set>
 #include <string>
+#include <vector>
 
 #include <fst/flags.h>
+#include <fst/arc.h>
+#include <fst/mutable-fst.h>
 #include <ngram/ngram-list-prune.h>
 #include <ngram/ngram-shrink.h>
 
@@ -41,7 +46,6 @@ int ngramshrink_main(int argc, char **argv) {
   std::string usage = "Shrink n-gram model from input model file.\n\n  Usage: ";
   usage += argv[0];
   usage += " [--options] [in.fst [out.fst]]\n";
-  std::set_new_handler(FailedNewHandler);
   SET_FLAGS(usage.c_str(), &argc, &argv, true);
 
   if (argc > 3) {

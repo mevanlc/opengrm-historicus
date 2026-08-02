@@ -19,10 +19,11 @@
 #define NGRAM_HIST_MAPPER_H_
 
 #include <array>
+#include <cmath>
 #include <cstdint>
 
 #include <fst/arc-map.h>
-#include <fst/fst.h>
+#include <fst/power-weight.h>
 #include <fst/properties.h>
 #include <ngram/hist-arc.h>
 

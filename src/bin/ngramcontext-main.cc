@@ -20,7 +20,8 @@
 #include <vector>
 
 #include <fst/flags.h>
-#include <fst/mutable-fst.h>
+#include <fst/arc.h>
+#include <fst/fst.h>
 #include <ngram/ngram-context.h>
 #include <ngram/ngram-model.h>
 
@@ -31,7 +32,6 @@ int ngramcontext_main(int argc, char **argv) {
   std::string usage = "Generates a context set from an input LM.\n\n  Usage: ";
   usage += argv[0];
   usage += " [--options] [in.fst] [out.fst]\n";
-  std::set_new_handler(FailedNewHandler);
   SET_FLAGS(usage.c_str(), &argc, &argv, true);
 
   if (argc < 2 || argc > 3) {

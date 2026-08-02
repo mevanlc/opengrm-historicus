@@ -19,16 +19,15 @@
 #define NGRAM_NGRAM_MODEL_H_
 
 #include <array>
+#include <cmath>
 #include <cstdint>
 #include <deque>
+#include <iostream>
+#include <ostream>
 #include <vector>
 
-#include <fst/flags.h>
-#include <fst/arcsort.h>
-#include <fst/compose.h>
 #include <fst/fst.h>
 #include <fst/matcher.h>
-#include <fst/vector-fst.h>
 #include <ngram/hist-arc.h>
 #include <ngram/util.h>
 

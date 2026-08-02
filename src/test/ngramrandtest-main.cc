@@ -16,31 +16,30 @@
 // Generates random sentences from an LM or more generally paths through any
 // FST where epsilons are treated as failure transitions.
 
+#include <cmath>
 #include <cstdint>
 #include <fstream>
+#include <iostream>
+#include <memory>
 #include <ostream>
 #include <sstream>
 #include <string>
 #include <vector>
 
 #include <fst/extensions/far/far.h>
-#include <fst/fst.h>
+#include <fst/arc.h>
+#include <fst/arcsort.h>
+#include <fst/float-weight.h>
+#include <fst/mutable-fst.h>
 #include <fst/randgen.h>
-#include <fst/rmepsilon.h>
-#include <fst/shortest-path.h>
+#include <fst/symbol-table.h>
 #include <fst/vector-fst.h>
 #include <ngram/ngram-absolute.h>
-#include <ngram/ngram-context-merge.h>
-#include <ngram/ngram-count-merge.h>
 #include <ngram/ngram-count.h>
 #include <ngram/ngram-katz.h>
 #include <ngram/ngram-kneser-ney.h>
-#include <ngram/ngram-make.h>
-#include <ngram/ngram-model-merge.h>
-#include <ngram/ngram-output.h>
+#include <ngram/ngram-model.h>
 #include <ngram/ngram-randgen.h>
-#include <ngram/ngram-seymore-shrink.h>
-#include <ngram/ngram-shrink.h>
 #include <ngram/ngram-witten-bell.h>
 
 DECLARE_int32(max_length);
@@ -207,7 +206,6 @@ int ngramrandtest_main(int argc, char **argv) {
   std::string usage = "Generates random data/models.\n\n  Usage: ";
   usage += argv[0];
   usage += " [--options]\n";
-  std::set_new_handler(FailedNewHandler);
   SET_FLAGS(usage.c_str(), &argc, &argv, true);
 
   std::ofstream varfstrm;

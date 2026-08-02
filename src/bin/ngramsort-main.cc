@@ -15,10 +15,13 @@
 //
 // Sorts an ngram LM in lexicographic state context order.
 
+#include <cstring>
 #include <memory>
 #include <string>
 
 #include <fst/flags.h>
+#include <fst/arc.h>
+#include <fst/mutable-fst.h>
 #include <ngram/ngram-mutable-model.h>
 
 DECLARE_bool(check_consistency);
@@ -30,7 +33,6 @@ int ngramsort_main(int argc, char **argv) {
       "Sorts an ngram LM in lexicographic state context order.\n\n  Usage: ";
   usage += argv[0];
   usage += " [--options] [in.fst [out.fst]]\n";
-  std::set_new_handler(FailedNewHandler);
   SET_FLAGS(usage.c_str(), &argc, &argv, true);
 
   if (argc > 3) {

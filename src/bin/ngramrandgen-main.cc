@@ -18,17 +18,17 @@
 
 #include <unistd.h>
 
-#include <cstdlib>
+#include <cstring>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <vector>
 
 #include <fst/flags.h>
 #include <fst/extensions/far/far.h>
+#include <fst/arc.h>
 #include <fst/fst.h>
 #include <fst/randgen.h>
-#include <fst/rmepsilon.h>
-#include <fst/shortest-path.h>
 #include <fst/vector-fst.h>
 #include <ngram/ngram-randgen.h>
 
@@ -42,7 +42,7 @@ DECLARE_bool(remove_total_weight);
 namespace {
 
 // create FST label for far, with sufficient padding for the number
-int CalcExtLen(int value, std::string *key, int far_len) {
+int CalcExtLen(int value, std::string * key, int far_len) {
   std::stringstream ss;
   ss << value;
   std::string extension;
@@ -108,7 +108,6 @@ int ngramrandgen_main(int argc, char **argv) {
   std::string usage = "Generates random sentences from an LM.\n\n  Usage: ";
   usage += argv[0];
   usage += " [--options] [in.fst [out.far]]\n";
-  std::set_new_handler(FailedNewHandler);
   SET_FLAGS(usage.c_str(), &argc, &argv, true);
 
   if (argc > 3) {

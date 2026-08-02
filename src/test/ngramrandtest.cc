@@ -15,6 +15,8 @@
 //
 #include <unistd.h>
 
+#include <ctime>
+
 #include <fst/flags.h>
 
 DEFINE_int32(max_length, 1000, "Maximum sentence length");

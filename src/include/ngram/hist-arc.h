@@ -18,8 +18,8 @@
 #ifndef NGRAM_HIST_ARC_H_
 #define NGRAM_HIST_ARC_H_
 
+#include <cstddef>
 #include <string>
-#include <utility>
 
 #include <fst/arc.h>
 
@@ -33,27 +33,9 @@ constexpr size_t kHistogramBins = 7;
 // HistogramArc is the Cartesian product of kHistogramBins StdArcs.
 struct HistogramArc
     : public fst::PowerArc<fst::StdArc, kHistogramBins> {
-  // Inherited types.
   using Base = fst::PowerArc<fst::StdArc, ::ngram::kHistogramBins>;
-  using Base::Label;
-  using Base::StateId;
-  using Base::Weight;
 
-  // Inherited fields.
-  using Base::ilabel;
-  using Base::nextstate;
-  using Base::olabel;
-  using Base::weight;
-
-  HistogramArc() = default;
-
-  template <class W>
-  HistogramArc(Label ilabel, Label olabel, W &&weight, StateId nextstate)
-      : Base(ilabel, olabel, std::forward<W>(weight), nextstate) {}
-
-  // Arc with weight One.
-  HistogramArc(Label ilabel, Label olabel, StateId nextstate)
-      : HistogramArc(ilabel, olabel, Weight::One(), nextstate) {}
+  using Base::Base;
 
   static const std::string &Type() {
     static const auto *const type = new std::string("hist");

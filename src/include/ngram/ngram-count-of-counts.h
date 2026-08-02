@@ -20,10 +20,14 @@
 #define NGRAM_NGRAM_COUNT_OF_COUNTS_H_
 
 #include <cmath>
-#include <string>
+#include <iostream>
+#include <memory>
+#include <sstream>
 #include <vector>
 
+#include <fst/fst.h>
 #include <fst/mutable-fst.h>
+#include <fst/symbol-table.h>
 #include <ngram/ngram-context.h>
 #include <ngram/ngram-model.h>
 #include <ngram/util.h>
@@ -45,7 +49,8 @@ class NGramCountOfCounts {
       NGRAMERROR() << "NGramCountOfCounts: Number of bins too large: " << bins;
   }
 
-  NGramCountOfCounts(std::string context_pattern, int order, int bins = -1)
+  NGramCountOfCounts(std::string_view context_pattern, int order,
+                     int bins = -1)
       : bins_(bins <= 0 || bins > kMaxBins ? kMaxBins : bins),
         context_(context_pattern, order) {
     if (bins > kMaxBins)
@@ -106,7 +111,7 @@ class NGramCountOfCounts {
 
   // Display input histogram
   void ShowCounts(const std::vector<std::vector<double>> &hist,
-                  const std::string &label) const {
+                  std::string_view label) const {
     int hi_order = hist.size();
     std::cerr << "Count bin   ";
     std::cerr << label;
@@ -130,7 +135,7 @@ class NGramCountOfCounts {
   }
 
   // Display internal histogram
-  void ShowCounts(const std::string &label) const {
+  void ShowCounts(std::string_view label) const {
     ShowCounts(histogram_, label);
   }
 

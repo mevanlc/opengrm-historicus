@@ -22,7 +22,11 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <vector>
+#include <ctime>
+#include <map>
+#include <utility>
+
+#include <fst/accumulator.h>
 
 // Faster multinomial sampling possible if Gnu Scientific Library available.
 #ifdef HAVE_GSL
@@ -197,11 +201,11 @@ class ArcSampler<A, ngram::NGramArcSelector<A> > {
   std::unique_ptr<C> accumulator_;
 
 #ifdef HAVE_GSL
-  gsl_rng *rng_;              // GNU Sci Lib random number generator
-  vector<double> pr_;         // multinomial parameters
-  vector<unsigned int> pos_;  // sample positions
-  vector<unsigned int> n_;    // sample counts
-#endif                        // HAVE_GSL
+  gsl_rng *rng_;                   // GNU Sci Lib random number generator
+  std::vector<double> pr_;         // multinomial parameters
+  std::vector<unsigned int> pos_;  // sample positions
+  std::vector<unsigned int> n_;    // sample counts
+#endif                             // HAVE_GSL
 
   WeightConvert<fst::Log64Weight, Weight> to_weight_;
   WeightConvert<Weight, fst::Log64Weight> to_log_weight_;

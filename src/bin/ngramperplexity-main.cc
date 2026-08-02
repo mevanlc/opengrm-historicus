@@ -15,7 +15,9 @@
 //
 // Calculates perplexity of an input FST archive using the given model.
 
+#include <cstring>
 #include <fstream>
+#include <iostream>
 #include <memory>
 #include <ostream>
 #include <string>
@@ -23,6 +25,10 @@
 
 #include <fst/flags.h>
 #include <fst/extensions/far/far.h>
+#include <fst/arc.h>
+#include <fst/fst.h>
+#include <fst/mutable-fst.h>
+#include <fst/vector-fst.h>
 #include <ngram/ngram-output.h>
 
 DECLARE_bool(use_phimatcher);
@@ -35,7 +41,6 @@ int ngramperplexity_main(int argc, char **argv) {
   std::string usage = "Apply n-gram model to input FST archive.\n\n  Usage: ";
   usage += argv[0];
   usage += " [--options] ngram.fst [in.far [out.txt]]\n";
-  std::set_new_handler(FailedNewHandler);
   SET_FLAGS(usage.c_str(), &argc, &argv, true);
 
   if (argc < 2 || argc > 4) {

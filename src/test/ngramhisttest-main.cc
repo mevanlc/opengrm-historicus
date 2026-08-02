@@ -17,12 +17,16 @@
 // Avoid complex shared object issues for equivalent FST library functions.
 
 #include <fstream>
+#include <iostream>
 #include <istream>
+#include <memory>
+#include <string>
 
-#include <fst/flags.h>
 #include <fst/log.h>
+#include <fst/symbol-table.h>
 #include <fst/script/compile.h>
 #include <fst/script/equal.h>
+#include <fst/script/fst-class.h>
 
 DECLARE_double(delta);
 DECLARE_string(ifile);
@@ -36,7 +40,6 @@ int ngramhisttest_main(int argc, char **argv) {
       "Compiles and tests equality of HistogramArc models.\n\n  Usage: ";
   usage += argv[0];
   usage += " [--options]\n";
-  std::set_new_handler(FailedNewHandler);
   SET_FLAGS(usage.c_str(), &argc, &argv, true);
   if (FST_FLAGS_ifile.empty() ||
       (FST_FLAGS_syms.empty() &&
@@ -76,10 +79,9 @@ int ngramhisttest_main(int argc, char **argv) {
       return 1;
     }
     std::istream &istrm = fstrm.is_open() ? fstrm : std::cin;
-    fst::script::Compile(istrm, FST_FLAGS_ifile,
-                             FST_FLAGS_ofile, "vector", "hist",
-                             syms.get(), syms.get(), ssyms.get(), false, true,
-                             true, true, false);
+    fst::script::Compile(
+        istrm, FST_FLAGS_ifile, FST_FLAGS_ofile, "vector",
+        "hist", syms.get(), syms.get(), ssyms.get(), false, true, true, true);
   }
   return 0;
 }

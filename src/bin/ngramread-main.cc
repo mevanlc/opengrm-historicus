@@ -15,8 +15,11 @@
 //
 // Reads textual model representations and produces n-gram model FST.
 
+#include <cstring>
 #include <fstream>
 #include <iostream>
+#include <istream>
+#include <ostream>
 #include <string>
 
 #include <fst/flags.h>
@@ -34,7 +37,6 @@ int ngramread_main(int argc, char **argv) {
   std::string usage = "Transform text formats to FST.\n\n  Usage: ";
   usage += argv[0];
   usage += " [--options] [in.txt [out.fst]]\n";
-  std::set_new_handler(FailedNewHandler);
   SET_FLAGS(usage.c_str(), &argc, &argv, true);
 
   if (argc > 3) {

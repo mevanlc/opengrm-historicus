@@ -17,21 +17,27 @@
 
 #include <ngram/ngram-marginalize.h>
 
+#include <cstddef>
 #include <vector>
 
+#include <fst/arc.h>
+#include <fst/expanded-fst.h>
+#include <fst/fst.h>
+#include <fst/mutable-fst.h>
+#include <ngram/ngram-model.h>
 #include <ngram/util.h>
 
 namespace ngram {
 
-using fst::ArcIterator;
-using fst::LogArc;
-using fst::MATCH_INPUT;
-using fst::Matcher;
-using fst::MutableArcIterator;
-using fst::StdArc;
-using fst::StdExpandedFst;
-using fst::StdFst;
-using fst::StdMutableFst;
+using ::fst::ArcIterator;
+using ::fst::LogArc;
+using ::fst::MATCH_INPUT;
+using ::fst::Matcher;
+using ::fst::MutableArcIterator;
+using ::fst::StdArc;
+using ::fst::StdExpandedFst;
+using ::fst::StdFst;
+using ::fst::StdMutableFst;
 
 // Calculates state marginal probs, and sums higher order log probs
 // Returns true with success.

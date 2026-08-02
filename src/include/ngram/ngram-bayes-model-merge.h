@@ -19,9 +19,13 @@
 #define NGRAM_NGRAM_BAYES_MODEL_MERGE_H_
 
 #include <cmath>
+#include <vector>
 
+#include <fst/arc.h>
 #include <fst/fst.h>
+#include <fst/mutable-fst.h>
 #include <ngram/ngram-merge.h>
+#include <ngram/ngram-model.h>
 
 namespace ngram {
 

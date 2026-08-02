@@ -18,9 +18,18 @@
 #ifndef NGRAM_NGRAM_LIST_PRUNE_H_
 #define NGRAM_NGRAM_LIST_PRUNE_H_
 
+#include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
+#include <fst/arc.h>
+#include <fst/expanded-fst.h>
+#include <fst/fst.h>
+#include <fst/matcher.h>
+#include <fst/mutable-fst.h>
+#include <fst/symbol-table.h>
+#include <ngram/ngram-model.h>
 #include <ngram/ngram-shrink.h>
 #include <ngram/util.h>
 #include <unordered_set>
@@ -48,7 +57,7 @@ class NGramListPrune : public NGramShrink<fst::StdArc> {
     InitializeNGramsToPrune();
   }
 
-  ~NGramListPrune() override {}
+  ~NGramListPrune() override = default;
 
   // Shrinks n-gram model, based on initialized parameters
   bool ShrinkNGramModel(int min_order = 2) {

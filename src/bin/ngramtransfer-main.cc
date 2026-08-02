@@ -15,14 +15,20 @@
 //
 // Transfers n-grams from a source model(s) to a destination model.
 
+#include <cstring>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <vector>
 
 #include <fst/flags.h>
+#include <fst/arc.h>
+#include <fst/vector-fst.h>
 #include <ngram/hist-arc.h>
 #include <ngram/ngram-complete.h>
+#include <ngram/ngram-context.h>
 #include <ngram/ngram-transfer.h>
+#include <ngram/util.h>
 
 DECLARE_int64(backoff_label);
 DECLARE_string(context_pattern1);
@@ -124,7 +130,6 @@ int ngramtransfer_main(int argc, char **argv) {
   std::string usage = "Transfer n-grams between models.\n\n  Usage: ";
   usage += argv[0];
   usage += " [--options] --ofile=out.fst in1.fst in2.fst [in3.fst ...]\n";
-  std::set_new_handler(FailedNewHandler);
   SET_FLAGS(usage.c_str(), &argc, &argv, true);
 
   if (argc < 3) {

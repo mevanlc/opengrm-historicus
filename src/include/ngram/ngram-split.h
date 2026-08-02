@@ -18,14 +18,17 @@
 #ifndef NGRAM_NGRAM_SPLIT_H_
 #define NGRAM_NGRAM_SPLIT_H_
 
+#include <cstddef>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
 
+#include <fst/arcsort.h>
+#include <fst/fst.h>
 #include <ngram/ngram-context.h>
 #include <ngram/ngram-model.h>
-#include <ngram/ngram-mutable-model.h>
 #include <ngram/util.h>
 
 namespace ngram {

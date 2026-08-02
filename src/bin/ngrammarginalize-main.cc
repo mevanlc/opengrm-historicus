@@ -15,14 +15,13 @@
 //
 // Applies smoothed marginalization constraints to given model.
 
+#include <cstring>
 #include <memory>
-#include <sstream>
 #include <string>
-#include <vector>
 
 #include <fst/flags.h>
+#include <fst/mutable-fst.h>
 #include <ngram/ngram-marginalize.h>
-#include <ngram/util.h>
 
 DECLARE_int64(backoff_label);
 DECLARE_int32(max_bo_updates);
@@ -34,7 +33,6 @@ int ngrammarginalize_main(int argc, char **argv) {
       "Marginalize n-gram model from input model file.\n\n  Usage: ";
   usage += argv[0];
   usage += " [--options] [in.fst [out.fst]]\n";
-  std::set_new_handler(FailedNewHandler);
   SET_FLAGS(usage.c_str(), &argc, &argv, true);
 
   if (argc > 3) {
@@ -46,8 +44,8 @@ int ngrammarginalize_main(int argc, char **argv) {
       (argc > 1 && (strcmp(argv[1], "-") != 0)) ? argv[1] : "";
   std::string out_name = argc > 2 ? argv[2] : "";
 
-  std::unique_ptr<fst::StdVectorFst> fst(
-      fst::StdVectorFst::Read(in_name));
+  std::unique_ptr<fst::StdMutableFst> fst(
+      fst::StdMutableFst::Read(in_name, /*convert=*/true));
   if (!fst) return 1;
 
   ngram::NGramMarginal ngramarg(fst.get(), FST_FLAGS_backoff_label,

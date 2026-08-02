@@ -19,11 +19,21 @@
 #define NGRAM_NGRAM_OUTPUT_H_
 
 #include <cstdint>
+#include <iostream>
+#include <memory>
 #include <ostream>
 #include <string>
+#include <vector>
 
+#include <fst/arc.h>
+#include <fst/cache.h>
 #include <fst/compose.h>
+#include <fst/fst.h>
+#include <fst/matcher.h>
+#include <fst/mutable-fst.h>
+#include <fst/vector-fst.h>
 #include <ngram/ngram-context.h>
+#include <ngram/ngram-model.h>
 #include <ngram/ngram-mutable-model.h>
 #include <ngram/util.h>
 
@@ -42,7 +52,7 @@ class NGramOutput : public NGramMutableModel<fst::StdArc> {
   explicit NGramOutput(fst::StdMutableFst *infst,
                        std::ostream &ostrm = std::cout, Label backoff_label = 0,
                        bool check_consistency = false,
-                       const std::string &context_pattern = "",
+                       std::string_view context_pattern = "",
                        bool include_all_suffixes = false)
       : NGramMutableModel<fst::StdArc>(
             infst, backoff_label, kNormEps,
@@ -138,14 +148,14 @@ class NGramOutput : public NGramMutableModel<fst::StdArc> {
   void ShowARPAHeader() const;
 
   // Print n-grams leaving a particular state for the ARPA model format
-  void ShowARPANGrams(fst::StdArc::StateId st, const std::string &str,
+  void ShowARPANGrams(fst::StdArc::StateId st, std::string_view str,
                       int order) const;
 
   // Print the N-gram model in ARPA format
   void ShowARPAModel() const;
 
   // Print n-grams leaving a particular state, standard output format
-  void ShowNGrams(fst::StdArc::StateId st, const std::string &str,
+  void ShowNGrams(fst::StdArc::StateId st, std::string_view str,
                   ShowBackoff showeps, bool neglogs, bool intcnts) const;
 
   void ShowStringFst(const fst::Fst<fst::StdArc> &infst) const;
@@ -171,9 +181,9 @@ class NGramOutput : public NGramMutableModel<fst::StdArc> {
 
   // add symbol to n-gram history string
   void AppendWordToNGramHistory(std::string *str,
-                                const std::string &symbol) const {
+                                std::string_view symbol) const {
     if (!str->empty()) *str += ' ';
-    *str += symbol;
+    *str += std::string(symbol);
   }
 
   // Calculate and show (if verbose) </s> n-gram, and accumulate stats

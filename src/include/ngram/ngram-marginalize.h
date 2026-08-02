@@ -18,6 +18,11 @@
 #ifndef NGRAM_NGRAM_MARGINALIZE_H_
 #define NGRAM_NGRAM_MARGINALIZE_H_
 
+#include <vector>
+
+#include <fst/arc.h>
+#include <fst/mutable-fst.h>
+#include <ngram/ngram-model.h>
 #include <ngram/ngram-mutable-model.h>
 #include <ngram/util.h>
 

@@ -15,10 +15,14 @@
 //
 // Makes a normalized n-gram model from an input FST with raw counts.
 
+#include <cstring>
 #include <memory>
 #include <string>
 
 #include <fst/flags.h>
+#include <fst/fst.h>
+#include <fst/mutable-fst.h>
+#include <fst/vector-fst.h>
 #include <ngram/hist-arc.h>
 #include <ngram/ngram-make.h>
 
@@ -37,7 +41,6 @@ int ngrammake_main(int argc, char **argv) {
   std::string usage = "Make n-gram model from input count file.\n\n  Usage: ";
   usage += argv[0];
   usage += " [--options] [in.fst [out.fst]]\n";
-  std::set_new_handler(FailedNewHandler);
   SET_FLAGS(usage.c_str(), &argc, &argv, true);
 
   if (argc < 1 || argc > 3) {
@@ -54,7 +57,7 @@ int ngrammake_main(int argc, char **argv) {
   }
 
   bool model_made = false;
-  std::unique_ptr<fst::StdVectorFst> fst;
+  std::unique_ptr<fst::StdMutableFst> fst;
   if (FST_FLAGS_method == "katz_frac") {
     std::unique_ptr<fst::VectorFst<ngram::HistogramArc>> hist_fst(
         fst::VectorFst<ngram::HistogramArc>::Read(in_name));
@@ -67,7 +70,7 @@ int ngrammake_main(int argc, char **argv) {
           FST_FLAGS_check_consistency);
     }
   } else {
-    fst.reset(fst::StdVectorFst::Read(in_name));
+    fst.reset(fst::StdMutableFst::Read(in_name, /*convert=*/true));
     if (fst) {
       model_made = ngram::NGramMakeModel(
           fst.get(), FST_FLAGS_method, ccfst.get(),

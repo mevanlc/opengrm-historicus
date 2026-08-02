@@ -19,10 +19,19 @@
 
 #include <cmath>
 #include <cstdint>
+#include <cstdlib>
 #include <ctime>
-#include <deque>
+#include <memory>
+#include <string>
+#include <vector>
 
+#include <fst/flags.h>
+#include <fst/arc.h>
 #include <fst/arcsort.h>
+#include <fst/expanded-fst.h>
+#include <fst/float-weight.h>
+#include <fst/fst.h>
+#include <fst/mutable-fst.h>
 #include <fst/vector-fst.h>
 #include <ngram/util.h>
 
@@ -31,17 +40,17 @@ DEFINE_string(end_symbol, "</s>", "Class label for sentence end");
 
 namespace ngram {
 
-using fst::ArcIterator;
-using fst::ComposeFst;
-using fst::Fst;
-using fst::MATCH_INPUT;
-using fst::Matcher;
-using fst::MutableArcIterator;
-using fst::StdArc;
-using fst::StdExpandedFst;
-using fst::StdFst;
-using fst::StdILabelCompare;
-using fst::StdMutableFst;
+using ::fst::ArcIterator;
+using ::fst::ComposeFst;
+using ::fst::Fst;
+using ::fst::MATCH_INPUT;
+using ::fst::Matcher;
+using ::fst::MutableArcIterator;
+using ::fst::StdArc;
+using ::fst::StdExpandedFst;
+using ::fst::StdFst;
+using ::fst::StdILabelCompare;
+using ::fst::StdMutableFst;
 
 // Determine whether n-gram state is in context or not
 bool NGramOutput::InContext(StateId st) const {
@@ -93,8 +102,8 @@ void NGramOutput::ShowNGramModel(NGramOutput::ShowBackoff showeps, bool neglogs,
 // Use n-gram model to calculate perplexity of input strings.
 // Returns true on success and false on failure.
 bool NGramOutput::PerplexityNGramModel(
-    const std::vector<std::unique_ptr<fst::StdVectorFst>> &infsts,
-    int32_t v, bool phimatch, std::string *OOV_symbol, double OOV_class_size,
+    const std::vector<std::unique_ptr<fst::StdVectorFst>> &infsts, int32_t v,
+    bool phimatch, std::string *OOV_symbol, double OOV_class_size,
     double OOV_probability) {
   if (Error()) return false;
   bool verbose = v > 0;
@@ -139,7 +148,7 @@ void NGramOutput::ShowARPAHeader() const {
 }
 
 // Print n-grams leaving a particular state for the ARPA model format
-void NGramOutput::ShowARPANGrams(StdArc::StateId st, const std::string &str,
+void NGramOutput::ShowARPANGrams(StdArc::StateId st, std::string_view str,
                                  int order) const {
   if (st < 0 || StateOrder(st) > order) return;  // ignore for st < 0
   bool show = InContext(st);
@@ -157,7 +166,7 @@ void NGramOutput::ShowARPANGrams(StdArc::StateId st, const std::string &str,
       continue;
     // Find symbol str.
     std::string symbol = GetFst().InputSymbols()->Find(arc.ilabel);
-    std::string newstr = str;                   // history string
+    std::string newstr(str);                    // history string
     AppendWordToNGramHistory(&newstr, symbol);  // Full n-gram
     if (show && order == StateOrder(st)) {      // only show target order
       ostrm_ << ShowLogNewBase(arc.weight.Value(), 10);  // log_10 n-gram prob
@@ -204,7 +213,7 @@ void NGramOutput::ShowARPAModel() const {
 }
 
 // Print n-grams leaving a particular state, standard output format
-void NGramOutput::ShowNGrams(StdArc::StateId st, const std::string &str,
+void NGramOutput::ShowNGrams(StdArc::StateId st, std::string_view str,
                              NGramOutput::ShowBackoff showeps, bool neglogs,
                              bool intcnts) const {
   if (st < 0) return;  // ignore for st < 0
@@ -217,7 +226,7 @@ void NGramOutput::ShowNGrams(StdArc::StateId st, const std::string &str,
       continue;
     // Find symbol str.
     std::string symbol = GetFst().InputSymbols()->Find(arc.ilabel);
-    std::string newstr = str;                   // history string
+    std::string newstr(str);                    // history string
     AppendWordToNGramHistory(&newstr, symbol);  // Full n-gram string
     if (show) {
       ostrm_ << newstr << "\t";  // output n-gram and its weight

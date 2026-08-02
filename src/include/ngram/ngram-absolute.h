@@ -20,8 +20,12 @@
 
 #include <vector>
 
+#include <fst/arc.h>
+#include <fst/fst.h>
+#include <fst/mutable-fst.h>
 #include <ngram/ngram-count-of-counts.h>
 #include <ngram/ngram-make.h>
+#include <ngram/ngram-model.h>
 
 namespace ngram {
 

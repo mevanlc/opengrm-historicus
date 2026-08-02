@@ -22,7 +22,12 @@
 #include <string>
 #include <vector>
 
+#include <fst/expanded-fst.h>
+#include <fst/fst.h>
+#include <fst/mutable-fst.h>
 #include <fst/script/fst-class.h>
+#include <ngram/hist-arc.h>
+#include <ngram/ngram-model.h>
 #include <ngram/ngram-mutable-model.h>
 #include <ngram/util.h>
 
@@ -63,7 +68,7 @@ class NGramMake : public NGramMutableModel<Arc> {
                                check_consistency, infinite_backoff),
         backoff_(backoff) {}
 
-  ~NGramMake() override {}
+  ~NGramMake() override = default;
 
   // Normalizes n-gram counts and smoothes to create an n-gram model.
   // Returns true on success and false on failure.

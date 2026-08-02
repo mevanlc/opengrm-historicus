@@ -20,10 +20,12 @@
 
 #include <algorithm>
 #include <cstring>
+#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include <fst/arc.h>
 #include <fst/fst.h>
 #include <ngram/ngram-model.h>
 #include <unordered_map>
@@ -200,8 +202,8 @@ class NGramExtendedContext {
   // pattern string. An extended context pattern is a comma-separated
   // set of NGramContext context patterns that must be disjoint.
   // If 'merge_contexts' is true, adjacent contexts will be merged.
-  NGramExtendedContext(const std::string &extended_context_pattern,
-                       int hi_order, bool merge_contexts = true) {
+  NGramExtendedContext(std::string_view extended_context_pattern, int hi_order,
+                       bool merge_contexts = true) {
     ParseContextIntervals(extended_context_pattern, hi_order, &contexts_);
     Init(merge_contexts);
   }
@@ -215,7 +217,7 @@ class NGramExtendedContext {
   }
 
   // Null context
-  NGramExtendedContext() {}
+  NGramExtendedContext() = default;
 
   // No/empty context requested?
   int NullContext() const { return contexts_.empty(); }
@@ -231,11 +233,11 @@ class NGramExtendedContext {
   // 'include_all_suffixes' is true, then all suffixes of the begin
   // and end contexts are considered in context. When false, true
   // (reverse) lexicographic order is used.
-  const NGramContext *GetContext(const std::vector<Label> &ngram,
-                                 bool include_all_suffixes = true) const;
+  const NGramContext * GetContext(
+      const std::vector<Label> &ngram, bool include_all_suffixes = true) const;
 
   // Derives NGramContext vector from input extended context pattern string.
-  static void ParseContextIntervals(const std::string &extended_context_pattern,
+  static void ParseContextIntervals(std::string_view extended_context_pattern,
                                     int hi_order,
                                     std::vector<NGramContext> *contexts);
 

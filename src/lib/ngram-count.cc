@@ -18,7 +18,22 @@
 #include <ngram/ngram-count.h>
 
 #include <cmath>
+#include <cstddef>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
+#include <fst/extensions/far/far.h>
+#include <fst/arc-map.h>
+#include <fst/arc.h>
+#include <fst/arcsort.h>
+#include <fst/float-weight.h>
+#include <fst/mutable-fst.h>
+#include <fst/properties.h>
+#include <fst/symbol-table.h>
+#include <fst/vector-fst.h>
+#include <ngram/hist-arc.h>
 #include <ngram/hist-mapper.h>
 #include <ngram/ngram-hist-merge.h>
 
@@ -132,7 +147,7 @@ bool GetNGramHistograms(fst::FarReader<fst::StdArc> *far_reader,
     if (ngramrg == nullptr) {
       ArcMap(in_fst, fst, ToHistogramMapper<fst::StdArc>());
       ngramrg = std::make_unique<NGramHistMerge>(fst, backoff_label, norm_eps,
-                                                  check_consistency);
+                                                 check_consistency);
     } else {
       fst::VectorFst<HistogramArc> hist_fst;
       ArcMap(in_fst, &hist_fst, ToHistogramMapper<fst::StdArc>());

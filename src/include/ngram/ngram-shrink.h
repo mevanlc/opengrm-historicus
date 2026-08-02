@@ -18,10 +18,21 @@
 #ifndef NGRAM_NGRAM_SHRINK_H_
 #define NGRAM_NGRAM_SHRINK_H_
 
+#include <algorithm>
 #include <cstdint>
 #include <limits>
+#include <set>
 #include <sstream>
+#include <string>
+#include <vector>
 
+#include <fst/arc.h>
+#include <fst/connect.h>
+#include <fst/expanded-fst.h>
+#include <fst/fst.h>
+#include <fst/matcher.h>
+#include <fst/mutable-fst.h>
+#include <ngram/ngram-model.h>
 #include <ngram/ngram-mutable-model.h>
 #include <ngram/util.h>
 
@@ -75,7 +86,7 @@ class NGramShrink : public NGramMutableModel<Arc> {
   void GetNGramsAndOrScoresMinOrder(std::vector<std::vector<Label>> *ngrams,
                                     std::vector<double> *scores, int min_order);
 
-  ~NGramShrink() override {}
+  ~NGramShrink() override = default;
 
  protected:
   // Data representation for an arc being considered for pruning.
@@ -933,7 +944,7 @@ bool NGramShrinkModel(
     const std::set<std::vector<fst::StdArc::Label>> &ngram_list,
     double tot_uni = -1.0, double theta = 0.0, int64_t target_num = -1,
     int32_t min_order = 2, const std::string &count_pattern = "",
-    const std::string &context_pattern = "", int shrink_opt = 0,
+    std::string_view context_pattern = "", int shrink_opt = 0,
     fst::StdArc::Label backoff_label = 0, double norm_eps = kNormEps,
     bool check_consistency = false);
 
@@ -942,7 +953,7 @@ bool NGramShrinkModel(fst::StdMutableFst *fst, const std::string &method,
                       double tot_uni = -1.0, double theta = 0.0,
                       int64_t target_num = -1, int32_t min_order = 2,
                       const std::string &count_pattern = "",
-                      const std::string &context_pattern = "",
+                      std::string_view context_pattern = "",
                       int shrink_opt = 0,
                       fst::StdArc::Label backoff_label = 0,
                       double norm_eps = kNormEps,

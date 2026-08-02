@@ -15,15 +15,20 @@
 //
 // Prints out various information about n-gram language models.
 
+#include <cstddef>
 #include <fstream>
-#include <iomanip>
+#include <ios>
+#include <iostream>
 #include <memory>
 #include <ostream>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include <fst/flags.h>
-#include <fst/vector-fst.h>
+#include <fst/arc.h>
+#include <fst/fst.h>
+#include <fst/mutable-fst.h>
 #include <ngram/ngram-model.h>
 #include <ngram/util.h>
 
@@ -95,7 +100,6 @@ int ngraminfo_main(int argc, char **argv) {
   usage += argv[0];
   usage += " [--options] [in.fst [out.txt]]\n";
 
-  std::set_new_handler(FailedNewHandler);
   SET_FLAGS(usage.c_str(), &argc, &argv, true);
   if (argc > 3) {
     ShowUsage();

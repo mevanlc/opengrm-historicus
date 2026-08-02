@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 #include <fst/flags.h>
-#include <ngram/ngram-model.h>
+#include <fst/weight.h>
 
 DEFINE_double(delta, fst::kDelta, "Comparison/quantization delta");
 DEFINE_string(ifile, "", "input file name");

@@ -15,6 +15,8 @@
 //
 // Splits an n-gram model based on given context patterns.
 
+#include <algorithm>
+#include <cstddef>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -23,8 +25,13 @@
 #include <fst/flags.h>
 #include <fst/extensions/far/far.h>
 #include <fst/extensions/far/getters.h>
+#include <fst/arc.h>
+#include <fst/vector-fst.h>
+#include <ngram/hist-arc.h>
 #include <ngram/ngram-complete.h>
+#include <ngram/ngram-context.h>
 #include <ngram/ngram-split.h>
+#include <ngram/util.h>
 
 DECLARE_int64(backoff_label);
 DECLARE_string(contexts);
@@ -65,7 +72,7 @@ void GetSortedPatterns(const std::vector<std::string> &context_patterns,
   std::sort(sorted_full_patterns->begin(), sorted_full_patterns->end());
   for (const auto &full_pattern : *sorted_full_patterns) {
     std::vector<std::string> split_pattern =
-        ::fst::StrSplit(full_pattern, '/', ::fst::SkipEmpty());
+        StrSplit(full_pattern, '/', fst::SkipEmpty());
     CHECK_EQ(split_pattern.size(), 2);
     sorted_context_patterns->push_back(split_pattern[0]);
   }
@@ -101,7 +108,7 @@ bool SplitToFar(fst::VectorFst<Arc> *fst,
 }
 
 template <class Arc>
-bool CountOrHistogramSplit(const std::string &in_name,
+bool CountOrHistogramSplit(std::string_view in_name,
                            const std::vector<std::string> &context_patterns,
                            const std::string &out_name_prefix,
                            const std::string &input_far_type_str) {
@@ -137,7 +144,6 @@ int ngramsplit_main(int argc, char **argv) {
       "Split an n-gram model using context patterns.\n\n  Usage: ";
   usage += argv[0];
   usage += " [--options] in_fst [out_fsts_prefix]\n";
-  std::set_new_handler(FailedNewHandler);
   SET_FLAGS(usage.c_str(), &argc, &argv, true);
 
   if (argc > 3 || argc < 2) {

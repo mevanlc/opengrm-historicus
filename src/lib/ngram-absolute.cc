@@ -17,16 +17,19 @@
 
 #include <ngram/ngram-absolute.h>
 
+#include <cmath>
 #include <vector>
 
-#include <fst/flags.h>
+#include <fst/arc.h>
 #include <fst/arcsort.h>
-#include <fst/vector-fst.h>
+#include <ngram/ngram-make.h>
+#include <ngram/ngram-model.h>
+#include <ngram/util.h>
 
 namespace ngram {
 
-using fst::StdArc;
-using fst::StdILabelCompare;
+using ::fst::StdArc;
+using ::fst::StdILabelCompare;
 
 // Normalize n-gram counts and smooth to create an n-gram model
 // Using Absolute Discounting Methods

@@ -15,7 +15,14 @@
 //
 #include <ngram/ngram-list-prune.h>
 
+#include <set>
+#include <string>
+#include <vector>
+
+#include <fst/arc.h>
+#include <fst/symbol-table.h>
 #include <ngram/ngram-input.h>
+#include <cctype>
 
 namespace ngram {
 

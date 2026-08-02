@@ -15,14 +15,24 @@
 //
 // Intersects n-gram FST with input FST archive.
 
+#include <cstring>
+#include <iostream>
 #include <memory>
 #include <string>
 
 #include <fst/flags.h>
 #include <fst/extensions/far/far.h>
+#include <fst/arc.h>
+#include <fst/compose.h>
+#include <fst/determinize.h>
 #include <fst/fst.h>
+#include <fst/mutable-fst.h>
+#include <fst/rmepsilon.h>
+#include <fst/symbol-table.h>
+#include <fst/vector-fst.h>
 #include <ngram/lexicographic-map.h>
 #include <ngram/ngram-output.h>
+#include <ngram/util.h>
 
 DECLARE_string(bo_arc_type);
 
@@ -32,7 +42,6 @@ int ngramapply_main(int argc, char** argv) {
   std::string usage = "Intersects n-gram model with FST archive.\n\n  Usage: ";
   usage += argv[0];
   usage += " [--options] ngram.fst [in.far [out.far]]\n";
-  std::set_new_handler(FailedNewHandler);
   SET_FLAGS(usage.c_str(), &argc, &argv, true);
 
   if (argc < 2 || argc > 4) {
@@ -56,12 +65,12 @@ int ngramapply_main(int argc, char** argv) {
   // TODO(rws): This is temporary to avoid issues having to do with
   // symbol table compatibility. At some point we need to sanitize all
   // of that.
-  FST_FLAGS_fst_compat_symbols = false;
+  SetFlag(&FST_FLAGS_fst_compat_symbols, false);
   fst::FstReadOptions opts;
 
   std::string in1_name = strcmp(argv[1], "-") != 0 ? argv[1] : "";
-  std::unique_ptr<fst::StdVectorFst> lmfst(
-      fst::StdVectorFst::Read(in1_name));
+  std::unique_ptr<fst::StdMutableFst> lmfst(
+      fst::StdMutableFst::Read(in1_name, /*convert=*/true));
   if (!lmfst) return 1;
 
   ngram::NGramOutput ngram(lmfst.get());

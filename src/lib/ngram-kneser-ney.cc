@@ -17,20 +17,23 @@
 
 #include <ngram/ngram-kneser-ney.h>
 
-#include <vector>
-
+#include <fst/arc.h>
 #include <fst/arcsort.h>
+#include <fst/expanded-fst.h>
+#include <fst/mutable-fst.h>
 #include <fst/vector-fst.h>
+#include <ngram/ngram-absolute.h>
+#include <ngram/ngram-model.h>
 #include <ngram/util.h>
 
 namespace ngram {
 
-using fst::ArcIterator;
-using fst::MutableArcIterator;
-using fst::StdArc;
-using fst::StdExpandedFst;
-using fst::StdILabelCompare;
-using fst::StdMutableFst;
+using ::fst::ArcIterator;
+using ::fst::MutableArcIterator;
+using ::fst::StdArc;
+using ::fst::StdExpandedFst;
+using ::fst::StdILabelCompare;
+using ::fst::StdMutableFst;
 
 // Normalize n-gram counts and smooth to create an n-gram model
 // Using Kneser-Ney methods.

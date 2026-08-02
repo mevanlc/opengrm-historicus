@@ -20,7 +20,9 @@
 
 #include <vector>
 
+#include <fst/mutable-fst.h>
 #include <ngram/ngram-absolute.h>
+#include <ngram/ngram-model.h>
 
 namespace ngram {
 

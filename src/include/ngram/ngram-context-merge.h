@@ -18,10 +18,13 @@
 #ifndef NGRAM_NGRAM_CONTEXT_MERGE_H_
 #define NGRAM_NGRAM_CONTEXT_MERGE_H_
 
-#include <string>
+#include <memory>
+#include <vector>
 
+#include <fst/arc.h>
 #include <ngram/ngram-context.h>
 #include <ngram/ngram-merge.h>
+#include <ngram/ngram-model.h>
 #include <ngram/util.h>
 
 namespace ngram {
@@ -46,7 +49,7 @@ class NGramContextMerge : public NGramMerge<fst::StdArc> {
   // shared arcs.  See 'ngram-context.h' for meaning of the context
   // specification.
   void MergeNGramModels(const fst::StdFst &infst2,
-                        const std::string &context_pattern, bool norm = false) {
+                        std::string_view context_pattern, bool norm = false) {
     context_ =
         std::make_unique<NGramExtendedContext>(context_pattern, HiOrder());
     if (!NGramMerge<fst::StdArc>::MergeNGramModels(infst2, norm)) {
@@ -65,7 +68,7 @@ class NGramContextMerge : public NGramMerge<fst::StdArc> {
                         const std::vector<Label> &context_end,
                         bool norm = false) {
     context_ = std::make_unique<NGramExtendedContext>(context_begin,
-                                                       context_end, HiOrder());
+                                                      context_end, HiOrder());
     if (!NGramMerge<fst::StdArc>::MergeNGramModels(infst2, norm)) {
       NGRAMERROR() << "Context merge failed";
       NGramModel<fst::StdArc>::SetError();

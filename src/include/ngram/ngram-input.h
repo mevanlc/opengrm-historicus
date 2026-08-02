@@ -19,20 +19,25 @@
 #define NGRAM_NGRAM_INPUT_H_
 
 #include <iostream>
+#include <istream>
 #include <memory>
+#include <ostream>
 #include <sstream>
 #include <string>
 #include <vector>
 
+#include <fst/arc.h>
+#include <fst/float-weight.h>
 #include <fst/fst.h>
 #include <fst/matcher.h>
 #include <fst/mutable-fst.h>
+#include <fst/symbol-table.h>
 #include <ngram/ngram-count.h>
 
 namespace ngram {
 
 // Reads vector of tokens from string.
-void ReadTokenString(const std::string &str, std::vector<std::string> *words);
+void ReadTokenString(std::string_view str, std::vector<std::string> *words);
 
 class NGramInput {
  public:
@@ -44,9 +49,9 @@ class NGramInput {
   using Counter = NGramCounter<fst::Log64Weight>;
 
   NGramInput(std::istream &istrm, std::ostream &ostrm,
-             const std::string &symbols, const std::string &epsilon_symbol,
-             const std::string &oov_symbol, const std::string &start_symbol,
-             const std::string &end_symbol);
+             const std::string &symbols, std::string_view epsilon_symbol,
+             std::string_view oov_symbol, std::string_view start_symbol,
+             std::string_view end_symbol);
 
   // Reads text input of three types: n-gram counts, ARPA model or text corpus.
   // Outputs a model FST, a corpus FAR, or a symbol table.
@@ -63,11 +68,11 @@ class NGramInput {
 
  private:
   void InitializeSymbols(const std::string &symbols,
-                         const std::string &epsilon_symbol);
+                         std::string_view epsilon_symbol);
 
   // Using whitespace as delimiter, reads token from string.
   static bool GetWhiteSpaceToken(std::string::const_iterator *it,
-                                 std::string *str, std::string *token);
+                                 const std::string &str, std::string *token);
 
   // Gets symbol label from table, adds it and ensure no duplicates if
   // requested.
@@ -78,8 +83,9 @@ class NGramInput {
                       bool *stsym, bool *endsym);
 
   // Uses string iterator to construct token, then gets the label for it.
-  Label ExtractNGramLabel(std::string::const_iterator *it, std::string *str,
-                          bool add, bool dups, bool *stsym, bool *endsym);
+  Label ExtractNGramLabel(std::string::const_iterator *it,
+                          const std::string &str, bool add, bool dups,
+                          bool *stsym, bool *endsym);
 
   // Gets backoff state and backoff cost for state (following <epsilon> arc).
   StateId GetBackoffAndCost(StateId st, double *cost);
@@ -88,12 +94,12 @@ class NGramInput {
   StateId GetBackoff(StateId st) { return GetBackoffAndCost(st, nullptr); }
 
   // Ensures matching with appropriate ARPA header strings.
-  bool ARPAHeaderStringMatch(const std::string &tomatch);
+  bool ARPAHeaderStringMatch(std::string_view tomatch);
 
   // Extracts string token and convert into value of type A.
   template <class A>
-  bool GetStringVal(std::string::const_iterator *it, std::string *str, A *val,
-                    std::string *keeptoken) {
+  bool GetStringVal(std::string::const_iterator *it, const std::string &str,
+                    A *val, std::string *keeptoken) {
     std::string token;
     if (!GetWhiteSpaceToken(it, str, &token)) return false;
     std::stringstream ss(token);
@@ -103,7 +109,7 @@ class NGramInput {
   }
 
   // When reading in string numerical tokens, ensures correct inf values.
-  static void CheckInfVal(const std::string &token, double *val);
+  static void CheckInfVal(std::string_view token, double *val);
 
   // Reads the header at the top of the ARPA model file, collect n-gram orders
   int ReadARPATopHeader(std::vector<int> *orders);
@@ -120,7 +126,7 @@ class NGramInput {
 
   // Extracts the token, finding the label and the appropriate destination
   // state.
-  ssize_t GetNextState(std::string::const_iterator *it, std::string *str,
+  ssize_t GetNextState(std::string::const_iterator *it, const std::string &str,
                        ssize_t st, Counter *ngram_counter);
 
   // Reads the header for each of the n-gram orders in the ARPA format file.
@@ -141,7 +147,7 @@ class NGramInput {
   void SetARPANGramDests();
 
   // Puts stored backoff weights on backoff arcs.
-  void SetARPABackoffWeights(std::vector<double> *boweights);
+  void SetARPABackoffWeights(const std::vector<double> &boweights);
 
   double GetLowerOrderProb(StateId st, Label label);
 
@@ -170,7 +176,7 @@ class NGramInput {
   void AddBackoffAndCycles(StateId unigram, Label bo_label);
 
   // Controls allocation of ARPA model start state.
-  void CheckInitState(std::vector<std::string> *words, StateId *init,
+  void CheckInitState(const std::vector<std::string> &words, StateId *init,
                       StateId unigram, StateId start);
 
   // Reads in N-gram tokens as well as count (last token) from string.
@@ -178,17 +184,17 @@ class NGramInput {
                              StateId *init, StateId unigram, StateId start);
 
   // Iterates through words in the n-gram history to find current state.
-  StateId GetHistoryState(std::vector<std::string> *words,
-                          std::vector<Label> *last_labels,
-                          std::vector<StateId> *last_states, StateId st);
+  StateId GetHistoryState(const std::vector<std::string> &words,
+                          const std::vector<Label> &last_labels,
+                          const std::vector<StateId> &last_states, StateId st);
 
   // Determines the next state for the final token of an n-gram.
   StateId GetCntNextSt(StateId st, StateId unigram, StateId init,
                        StateId *start, bool stsym, bool endsym);
 
   // Updates last label and state for retrieval with following n-grams.
-  static int UpdateLast(std::vector<std::string> *words, int longest_ngram,
-                        std::vector<Label> *last_labels,
+  static int UpdateLast(const std::vector<std::string> &words,
+                        int longest_ngram, std::vector<Label> *last_labels,
                         std::vector<StateId> *last_states, Label label,
                         StateId nextst);
 
@@ -196,7 +202,7 @@ class NGramInput {
   bool CompileNGramCounts(bool output);
 
   // Tokenizes string and store labels in a vector for building an FST.
-  double FillStringLabels(std::string *str, std::vector<Label> *labels,
+  double FillStringLabels(const std::string &str, std::vector<Label> *labels,
                           bool string_counts);
 
   // Converts text corpus to symbol table.

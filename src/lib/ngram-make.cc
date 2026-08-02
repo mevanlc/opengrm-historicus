@@ -18,12 +18,16 @@
 #include <ngram/ngram-make.h>
 
 #include <cstdint>
+#include <string>
 
 #include <fst/arc-map.h>
+#include <fst/arc.h>
+#include <fst/fst.h>
+#include <fst/mutable-fst.h>
+#include <fst/script/fst-class.h>
 #include <ngram/hist-arc.h>
 #include <ngram/hist-mapper.h>
 #include <ngram/ngram-absolute.h>
-#include <ngram/ngram-count-of-counts.h>
 #include <ngram/ngram-katz.h>
 #include <ngram/ngram-kneser-ney.h>
 #include <ngram/ngram-unsmoothed.h>
@@ -32,9 +36,9 @@
 
 namespace ngram {
 
-using fst::StdArc;
-using fst::StdFst;
-using fst::StdMutableFst;
+using ::fst::StdArc;
+using ::fst::StdFst;
+using ::fst::StdMutableFst;
 
 // Makes models from NGram count FSTs with StdArc counts.
 bool NGramMakeModel(fst::StdMutableFst *fst, const std::string &method,

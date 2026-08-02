@@ -18,12 +18,13 @@
 #ifndef NGRAM_NGRAM_TRANSFER_H_
 #define NGRAM_NGRAM_TRANSFER_H_
 
-#include <string>
+#include <map>
+#include <memory>
 #include <vector>
 
 #include <fst/fst.h>
+#include <fst/matcher.h>
 #include <fst/mutable-fst.h>
-#include <fst/vector-fst.h>
 #include <ngram/ngram-context.h>
 #include <ngram/ngram-model.h>
 #include <ngram/ngram-mutable-model.h>
@@ -40,23 +41,22 @@ class NGramTransfer {
 
   // Ctr for transfer from source FST(s) to this ctr FST.
   NGramTransfer(fst::MutableFst<Arc> *fst,
-                const std::string &context_pattern, Label backoff_label = 0,
+                std::string_view context_pattern, Label backoff_label = 0,
                 double norm_eps = kNormEps)
       : transfer_from_(true), error_(false) {
     InitDest(fst, context_pattern, backoff_label, norm_eps);
   }
 
   // Ctr for transfer from this ctr FST to destination FST(s).
-  NGramTransfer(const fst::Fst<Arc> &fst,
-                const std::string &context_pattern, Label backoff_label = 0,
-                double norm_eps = kNormEps)
+  NGramTransfer(const fst::Fst<Arc> &fst, std::string_view context_pattern,
+                Label backoff_label = 0, double norm_eps = kNormEps)
       : transfer_from_(false), error_(false) {
     InitSrc(fst, context_pattern, backoff_label, norm_eps);
   }
 
   // Transfer to ctr FST from this arg FST
   bool TransferNGramsFrom(const fst::Fst<Arc> &fst,
-                          const std::string &context_pn) {
+                          std::string_view context_pn) {
     if (Error()) return false;
     if (!transfer_from_) {
       NGRAMERROR()
@@ -72,7 +72,7 @@ class NGramTransfer {
 
   // Transfer from ctr FST to this arg FST
   bool TransferNGramsTo(fst::MutableFst<Arc> *fst,
-                        const std::string &context_pn) {
+                        std::string_view context_pn) {
     if (Error()) return false;
     if (transfer_from_) {
       NGRAMERROR() << "NGramTransfer::NGramTransferTo: constructor FST should "
@@ -100,7 +100,7 @@ class NGramTransfer {
 
   StateId FindNextState(StateId s, Label label) const;
 
-  void InitSrc(const fst::Fst<Arc> &fst, const std::string &context_pattern,
+  void InitSrc(const fst::Fst<Arc> &fst, std::string_view context_pattern,
                Label backoff_label, double norm_eps) {
     src_fst_.reset(fst.Copy());
     src_matcher_.reset(new fst::Matcher<fst::Fst<Arc>>(
@@ -113,15 +113,15 @@ class NGramTransfer {
   }
 
   void InitDest(fst::MutableFst<Arc> *fst,
-                const std::string &context_pattern, Label backoff_label,
+                std::string_view context_pattern, Label backoff_label,
                 double norm_eps) {
     dest_fst_ = fst;
     dest_model_.reset(
         new NGramMutableModel<Arc>(dest_fst_, backoff_label, norm_eps,
                                    /* state_ngrams= */false,
                                    /* infinite_backoff= */false));
-    dest_context_ = std::make_unique<NGramContext>(context_pattern,
-                                                    dest_model_->HiOrder());
+    dest_context_ =
+        std::make_unique<NGramContext>(context_pattern, dest_model_->HiOrder());
     if (dest_model_->Error()) SetError();
   }
 

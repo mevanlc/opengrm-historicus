@@ -16,13 +16,24 @@
 #include <ngram/ngram-input.h>
 
 #include <cmath>
-#include <fstream>
+#include <istream>
 #include <limits>
+#include <memory>
+#include <ostream>
 #include <sstream>
+#include <string>
+#include <vector>
 
+#include <fst/arc.h>
 #include <fst/arcsort.h>
+#include <fst/connect.h>
+#include <fst/float-weight.h>
+#include <fst/fst.h>
 #include <fst/matcher.h>
+#include <fst/mutable-fst.h>
+#include <fst/symbol-table.h>
 #include <fst/vector-fst.h>
+#include <ngram/ngram-count.h>
 #include <ngram/ngram-model.h>
 #include <ngram/ngram-mutable-model.h>
 #include <ngram/util.h>
@@ -45,11 +56,11 @@ using ::fst::StdMutableFst;
 using ::fst::StdVectorFst;
 using ::fst::SymbolTable;
 
-void ReadTokenString(const std::string &str, std::vector<std::string> *words) {
+void ReadTokenString(std::string_view str, std::vector<std::string> *words) {
   auto it = str.cbegin();
   while (it < str.cend()) {
-    if (words->empty() || isspace(*it)) {
-      while (isspace(*it)) ++it;       // Skips whitespace sequence.
+    if (words->empty() || std::isspace(*it)) {
+      while (std::isspace(*it)) ++it;       // Skips whitespace sequence.
       if (it != str.end()) words->emplace_back();  // Starts new empty word.
     } else {
       (*words)[words->size() - 1] += *it;  // Adds character to words.
@@ -60,10 +71,10 @@ void ReadTokenString(const std::string &str, std::vector<std::string> *words) {
 
 NGramInput::NGramInput(std::istream &istrm, std::ostream &ostrm,
                        const std::string &symbols,
-                       const std::string &epsilon_symbol,
-                       const std::string &oov_symbol,
-                       const std::string &start_symbol,
-                       const std::string &end_symbol)
+                       std::string_view epsilon_symbol,
+                       std::string_view oov_symbol,
+                       std::string_view start_symbol,
+                       std::string_view end_symbol)
     : oov_symbol_(oov_symbol),
       start_symbol_(start_symbol),
       end_symbol_(end_symbol),
@@ -89,7 +100,7 @@ bool NGramInput::ReadInput(bool ARPA, bool symbols, bool output,
 }
 
 void NGramInput::InitializeSymbols(const std::string &symbols,
-                                   const std::string &epsilon_symbol) {
+                                   std::string_view epsilon_symbol) {
   if (Error()) return;
   if (symbols.empty()) {                           // Symbol table not provided.
     syms_ = std::make_unique<SymbolTable>(
@@ -110,12 +121,13 @@ void NGramInput::InitializeSymbols(const std::string &symbols,
 
 // Using whitespace as delimiter, reads token from string.
 bool NGramInput::GetWhiteSpaceToken(std::string::const_iterator *it,
-                                    std::string *str, std::string *token) {
+                                    const std::string &str,
+                                    std::string *token) {
   // Skips the whitespace preceding the token.
-  while (isspace(**it)) ++*it;
+  while (std::isspace(**it)) ++*it;
   // No further tokens to be found in string.
-  if (*it == str->cend()) return false;
-  while (*it < str->cend() && !isspace(**it)) {
+  if (*it == str.cend()) return false;
+  while (*it < str.cend() && !std::isspace(**it)) {
     *token += **it;
     ++*it;
   }
@@ -168,31 +180,31 @@ typename NGramInput::Label NGramInput::GetNGramLabel(
 
 // Iterates through words in the n-gram history to find current state.
 typename NGramInput::StateId NGramInput::GetHistoryState(
-    std::vector<std::string> *words, std::vector<Label> *last_labels,
-    std::vector<StateId> *last_states, StateId st) {
-  for (auto i = 0; i < words->size() - 2; ++i) {
+    const std::vector<std::string> &words,
+    const std::vector<Label> &last_labels,
+    const std::vector<StateId> &last_states, StateId st) {
+  for (auto i = 0; i < words.size() - 2; ++i) {
     bool stsym;
     bool endsym;
-    const auto label =
-        GetNGramLabel((*words)[i], false, false, &stsym, &endsym);
+    const auto label = GetNGramLabel(words[i], false, false, &stsym, &endsym);
     if (Error()) return 0;
-    if (last_labels->size() <= i || label != (*last_labels)[i]) {
-      std::string prefix = (*words)[0];
-      for (auto j = 1; j <= i; ++j) prefix += " " + (*words)[j];
+    if (last_labels.size() <= i || label != last_labels[i]) {
+      std::string prefix = words[0];
+      for (auto j = 1; j <= i; ++j) prefix += " " + words[j];
       NGRAMERROR() << "NGramInput: n-gram prefix (" << prefix
                    << ") not seen in previous n-gram";
       SetError();
       return 0;
     }
-    st = (*last_states)[i];  // Retrieves previously stored state.
+    st = last_states[i];  // Retrieves previously stored state.
   }
   return st;
 }
 
 // Uses string iterator to construct token, then gets the label for it.
 typename NGramInput::Label NGramInput::ExtractNGramLabel(
-    std::string::const_iterator *it, std::string *str, bool add, bool dups,
-    bool *stsym, bool *endsym) {
+    std::string::const_iterator *it, const std::string &str, bool add,
+    bool dups, bool *stsym, bool *endsym) {
   std::string token;
   if (!GetWhiteSpaceToken(it, str, &token)) {
     NGRAMERROR() << "NGramInput: No token found when expected";
@@ -222,7 +234,7 @@ typename NGramInput::StateId NGramInput::GetBackoffAndCost(StateId st,
 }
 
 // Ensures matching with appropriate ARPA header strings.
-bool NGramInput::ARPAHeaderStringMatch(const std::string &tomatch) {
+bool NGramInput::ARPAHeaderStringMatch(std::string_view tomatch) {
   std::string str;
   if (!std::getline(istrm_, str)) {
     NGRAMERROR() << "Input stream read error";
@@ -230,9 +242,8 @@ bool NGramInput::ARPAHeaderStringMatch(const std::string &tomatch) {
     return false;
   }
   if (str != tomatch) {
-    str += "   Line should read: ";
-    str += tomatch;
-    NGRAMERROR() << "NGramInput: ARPA header mismatch!  Line reads: " << str;
+    NGRAMERROR() << "NGramInput: ARPA header mismatch!  Line reads: " << str
+                 << "  Line should read: " << tomatch;
     SetError();
     return false;
   }
@@ -240,7 +251,7 @@ bool NGramInput::ARPAHeaderStringMatch(const std::string &tomatch) {
 }
 
 // When reading in string numerical tokens, ensures correct inf values.
-void NGramInput::CheckInfVal(const std::string &token, double *val) {
+void NGramInput::CheckInfVal(std::string_view token, double *val) {
   if (token == "-inf" || token == "-Infinity") {
     *val = -std::numeric_limits<double>::infinity();
   } else if (token == "inf" || token == "Infinity") {
@@ -272,7 +283,7 @@ int NGramInput::ReadARPATopHeader(std::vector<int> *orders) {
     }
     ++it;
     int ngram_cnt;  // Must have n-gram count, fails if not found.
-    if (!GetStringVal(&it, &str, &ngram_cnt, nullptr)) {
+    if (!GetStringVal(&it, str, &ngram_cnt, nullptr)) {
       NGRAMERROR() << "NGramInput: ARPA header mismatch!  No ngram count.";
       SetError();
       return 0;
@@ -351,7 +362,7 @@ ssize_t NGramInput::NextStateFromLabel(
 
 // Extracts the token, finding the label and the appropriate destination state.
 ssize_t NGramInput::GetNextState(std::string::const_iterator *it,
-                                 std::string *str, ssize_t st,
+                                 const std::string &str, ssize_t st,
                                  NGramCounter<Log64Weight> *ngram_counter) {
   if (Error()) return 0;
   bool stsym = false;
@@ -396,7 +407,7 @@ void NGramInput::ReadARPAOrder(std::vector<int> *orders, int order,
     double nlprob;
     double boprob;
     std::string token;
-    if (!GetStringVal(&it, &str, &nlprob, &token)) {
+    if (!GetStringVal(&it, str, &nlprob, &token)) {
       NGRAMERROR() << "NGramInput: ARPA format mismatch!  No ngram log prob.";
       SetError();
       return;
@@ -406,11 +417,11 @@ void NGramInput::ReadARPAOrder(std::vector<int> *orders, int order,
     ssize_t st = ngram_counter->NGramUnigramState();
     StateId nextstate = fst::kNoStateId;
     for (int j = 0; j < order; ++j)  // Finds n-gram history state.
-      st = GetNextState(&it, &str, st, ngram_counter);
+      st = GetNextState(&it, str, st, ngram_counter);
     if (Error()) return;
     bool stsym;   // stsym == 1 for <s>.
     bool endsym;  // endsym == 1 for </s>.
-    Label label = ExtractNGramLabel(&it, &str, add_words,
+    Label label = ExtractNGramLabel(&it, str, add_words,
                                     /*dups=*/false, &stsym, &endsym);
     if (Error()) return;
     if (endsym) {
@@ -428,7 +439,7 @@ void NGramInput::ReadARPAOrder(std::vector<int> *orders, int order,
     } else {
       nextstate = ngram_counter->NGramStartState();
     }
-    if (GetStringVal(&it, &str, &boprob, &token) &&
+    if (GetStringVal(&it, str, &boprob, &token) &&
         (nextstate >= 0 || boprob != 0)) {  // Found non-zero backoff cost.
       if (nextstate == fst::kNoStateId) {
         NGRAMERROR() << "NGramInput: Have a backoff cost with no state ID!";
@@ -486,12 +497,12 @@ void NGramInput::SetARPANGramDests() {
 }
 
 // Puts stored backoff weights on backoff arcs.
-void NGramInput::SetARPABackoffWeights(std::vector<double> *boweights) {
+void NGramInput::SetARPABackoffWeights(const std::vector<double> &boweights) {
   for (StateIterator<MutableFst<Arc>> siter(*fst_); !siter.Done();
        siter.Next()) {
     const auto st = siter.Value();
-    if (st < boweights->size()) {
-      const auto boprob = (*boweights)[st];
+    if (st < boweights.size()) {
+      const auto boprob = boweights[st];
       MutableArcIterator<StdMutableFst> aiter(fst_.get(), st);
       auto arc = aiter.Value();
       if (arc.ilabel == 0 || boprob != StdArc::Weight::Zero().Value()) {
@@ -586,7 +597,7 @@ bool NGramInput::CompileARPAModel(bool output, bool renormalize) {
   ngram_counter.GetFst(fst_.get());
   static const StdILabelCompare icomp;
   ArcSort(fst_.get(), icomp);
-  SetARPABackoffWeights(&boweights);
+  SetARPABackoffWeights(boweights);
   if (Error()) return false;
   FillARPAHoles();
   if (Error()) return false;
@@ -687,9 +698,9 @@ void NGramInput::AddBackoffAndCycles(StateId unigram, Label bo_label) {
 }
 
 // Controls allocation of ARPA model start state.
-void NGramInput::CheckInitState(std::vector<std::string> *words, StateId *init,
-                                StateId unigram, StateId start) {
-  if (words->size() > 2 && *init == unigram) {  // 1st evidence order > 1.
+void NGramInput::CheckInitState(const std::vector<std::string> &words,
+                                StateId *init, StateId unigram, StateId start) {
+  if (words.size() > 2 && *init == unigram) {  // 1st evidence order > 1.
     if (start >= 0) {
       // If the start unigram is already seen, we use this state as initial.
       *init = start;
@@ -715,7 +726,7 @@ double NGramInput::ReadNGramFromString(std::string str,
   std::stringstream cnt_ss((*words)[words->size() - 1]);
   double ngram_count;
   cnt_ss >> ngram_count;
-  CheckInitState(words, init, unigram, start);  // Checks start state status.
+  CheckInitState(*words, init, unigram, start);  // Checks start state status.
   return -log(ngram_count);  // Counts are encoded in -log-space.
 }
 
@@ -744,17 +755,17 @@ typename NGramInput::StateId NGramInput::GetCntNextSt(StateId st,
 }
 
 // Updates last label and state, for retrieval by following n-grams.
-int NGramInput::UpdateLast(std::vector<std::string> *words, int longest_ngram,
-                           std::vector<Label> *last_labels,
+int NGramInput::UpdateLast(const std::vector<std::string> &words,
+                           int longest_ngram, std::vector<Label> *last_labels,
                            std::vector<StateId> *last_states, Label label,
                            StateId nextst) {
-  if (words->size() > longest_ngram + 1) {  // Adds a dimension to vectors.
+  if (words.size() > longest_ngram + 1) {  // Adds a dimension to vectors.
     ++longest_ngram;
     last_labels->push_back(-1);
     last_states->push_back(-1);
   }
-  (*last_labels)[words->size() - 2] = label;
-  (*last_states)[words->size() - 2] = nextst;
+  (*last_labels)[words.size() - 2] = label;
+  (*last_states)[words.size() - 2] = nextst;
   return longest_ngram;
 }
 
@@ -775,7 +786,7 @@ bool NGramInput::CompileNGramCounts(bool output) {
         ReadNGramFromString(str, &words, &init, unigram, start);
     if (Error()) return false;
     // Finds n-gram history state from prefix words in n-gram.
-    auto st = GetHistoryState(&words, &last_labels, &last_states, unigram);
+    auto st = GetHistoryState(words, last_labels, last_states, unigram);
     if (Error()) return false;
     bool stsym;
     bool endsym;
@@ -790,7 +801,7 @@ bool NGramInput::CompileNGramCounts(bool output) {
     AddNGramArc(st, nextst, label, stsym, endsym, ngram_count);
     // Updates states and labels for subsequent n-grams.
     longram =
-        UpdateLast(&words, longram, &last_labels, &last_states, label, nextst);
+        UpdateLast(words, longram, &last_labels, &last_states, label, nextst);
   }
   // Sets init as start state for unigram model.
   if (init == unigram) fst_->SetStart(init);
@@ -800,11 +811,11 @@ bool NGramInput::CompileNGramCounts(bool output) {
 }
 
 // Tokenizes string and store labels in a vector for building an FST.
-double NGramInput::FillStringLabels(std::string *str,
+double NGramInput::FillStringLabels(const std::string &str,
                                     std::vector<Label> *labels,
                                     bool string_counts) {
   std::string token;
-  auto it = str->cbegin();
+  auto it = str.cbegin();
   double count = 1.0;
   if (string_counts) {
     GetWhiteSpaceToken(&it, str, &token);
@@ -822,7 +833,7 @@ double NGramInput::FillStringLabels(std::string *str,
 bool NGramInput::CompileSymbolTable(bool output) {
   for (std::string str; std::getline(istrm_, str);) {  // For each string.
     std::vector<Label> labels;
-    FillStringLabels(&str, &labels, false);
+    FillStringLabels(str, &labels, false);
     if (Error()) return false;
   }
   if (!oov_symbol_.empty()) syms_->AddSymbol(oov_symbol_);

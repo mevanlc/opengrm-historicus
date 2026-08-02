@@ -16,14 +16,20 @@
 // Merges two input n-gram models into a single model.
 
 #include <cmath>
+#include <cstring>
 #include <memory>
 #include <string>
 #include <vector>
 
 #include <fst/flags.h>
+#include <fst/arc.h>
+#include <fst/mutable-fst.h>
+#include <fst/vector-fst.h>
+#include <ngram/hist-arc.h>
 #include <ngram/ngram-bayes-model-merge.h>
 #include <ngram/ngram-complete.h>
 #include <ngram/ngram-context-merge.h>
+#include <ngram/ngram-context.h>
 #include <ngram/ngram-count-merge.h>
 #include <ngram/ngram-hist-merge.h>
 #include <ngram/ngram-model-merge.h>
@@ -110,7 +116,6 @@ int ngrammerge_main(int argc, char **argv) {
   std::string usage = "Merge n-gram models.\n\n  Usage: ";
   usage += argv[0];
   usage += " [--options] -ofile=out.fst in1.fst in2.fst [in3.fst ...]\n";
-  std::set_new_handler(FailedNewHandler);
   SET_FLAGS(usage.c_str(), &argc, &argv, true);
 
   if (argc < 3) {

@@ -15,20 +15,22 @@
 //
 // Counts n-grams from an input fst archive (FAR) file.
 
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <ostream>
 #include <string>
 #include <vector>
 
 #include <fst/flags.h>
 #include <fst/log.h>
 #include <fst/extensions/far/far.h>
+#include <fst/arc.h>
 #include <fst/fst.h>
 #include <fst/vector-fst.h>
 #include <ngram/hist-arc.h>
 #include <ngram/ngram-count.h>
-#include <ngram/ngram-model.h>
 
 DECLARE_string(method);
 DECLARE_int64(order);
@@ -57,7 +59,6 @@ int ngramcount_main(int argc, char **argv) {
   std::string usage = "Count n-grams from input file.\n\n  Usage: ";
   usage += argv[0];
   usage += " [--options] [in.far [out.fst]]\n";
-  std::set_new_handler(FailedNewHandler);
   SET_FLAGS(usage.c_str(), &argc, &argv, true);
 
   if (argc > 3) {
@@ -125,8 +126,7 @@ int ngramcount_main(int argc, char **argv) {
     ngrams_counted = true;
     fst::StdVectorFst ccfst;
     if (FST_FLAGS_method == "count_of_counts") {
-      std::unique_ptr<fst::StdVectorFst> fst(
-          fst::StdVectorFst::Read(in_name));
+      std::unique_ptr<fst::StdFst> fst(fst::StdFst::Read(in_name));
       if (!fst) return 1;
       ngram::GetNGramCountOfCounts<fst::StdArc>(
           *fst, &ccfst, FST_FLAGS_order,

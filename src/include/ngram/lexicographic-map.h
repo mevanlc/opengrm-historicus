@@ -34,7 +34,7 @@
 #include <fst/compose.h>
 #include <fst/determinize.h>
 #include <fst/fst.h>
-#include <fst/lexicographic-weight.h>
+#include <fst/properties.h>
 #include <fst/rmepsilon.h>
 #include <fst/vector-fst.h>
 #include <ngram/ngram-model.h>

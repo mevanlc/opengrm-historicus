@@ -18,41 +18,53 @@
 #include <ngram/ngram-context.h>
 
 #include <algorithm>
+#include <cstddef>
 #include <cstring>
 #include <fstream>
+#include <iostream>
 #include <istream>
-#include <map>
+#include <iterator>
 #include <ostream>
 #include <string>
+#include <utility>
 #include <vector>
 
-#include <fst/fst.h>
+#include <fst/arc.h>
+#include <fst/util.h>
 
 namespace ngram {
 
-using fst::StdArc;
+using ::fst::StdArc;
 
 namespace {
 // Utility wrapper for HasContext that avoids copying the input vector.
 class ReversedPaddedVector {
  public:
-  typedef StdArc::Label Label;
+  using Label = StdArc::Label;
 
   // The input must outlive this.
   explicit ReversedPaddedVector(const std::vector<Label>& in, size_t len)
       : in_(in), len_(len) {}
 
-  class Iterator : public std::iterator<std::input_iterator_tag, Label> {
+  class Iterator {
    public:
+    using difference_type = std::ptrdiff_t;
+    using iterator_category = std::input_iterator_tag;
+    using pointer = Label*;
+    using reference = Label&;
+    using value_type = Label;
+
     explicit Iterator(const ReversedPaddedVector* v, size_t i): i_(i), v_(v) {}
 
     Iterator(const Iterator&) = default;
+
     Iterator& operator=(const Iterator&) = default;
 
     Iterator& operator++() {
       i_ = std::min(i_ + 1, v_->len_);
       return *this;
     }
+
     Iterator operator++(int) {
       Iterator ret = *this;
       i_ = std::min(i_ + 1, v_->len_);
@@ -62,11 +74,12 @@ class ReversedPaddedVector {
     bool operator==(Iterator other) const {
       return i_ == other.i_ && v_ == other.v_;
     }
+
     bool operator!=(Iterator other) const {
       return i_ != other.i_ || v_ != other.v_;
     }
 
-    Label operator*() {
+    value_type operator*() {
       return (i_ < v_->in_.size()) ? v_->in_[v_->in_.size() - i_ - 1] : 0;
     }
 
@@ -76,6 +89,7 @@ class ReversedPaddedVector {
   };
 
   Iterator begin() const { return Iterator(this, 0); }
+
   Iterator end() const { return Iterator(this, len_); }
 
  private:
@@ -119,19 +133,19 @@ void NGramContext::ParseContextInterval(std::string_view context_pattern,
   if (context_pattern.empty()) return;
 
   std::vector<std::string_view> contexts =
-      ::fst::StrSplit(context_pattern, ':', ::fst::SkipEmpty());
+      StrSplit(context_pattern, ':', fst::SkipEmpty());
   if (contexts.size() != 2)
     LOG(FATAL) << "NGramContext: bad context pattern: " << context_pattern;
   std::vector<std::string_view> labels1 =
-      ::fst::StrSplit(contexts[0], ' ', ::fst::SkipEmpty());
+      StrSplit(contexts[0], ' ', fst::SkipEmpty());
   std::vector<std::string_view> labels2 =
-      ::fst::StrSplit(contexts[1], ' ', ::fst::SkipEmpty());
+      StrSplit(contexts[1], ' ', fst::SkipEmpty());
   for (int i = 0; i < labels1.size(); ++i) {
-    Label label = fst::StrToInt64(labels1[i], "context begin", 1, false);
+    Label label = fst::StrToInt64(labels1[i], "context begin", 1);
     context_begin->push_back(label);
   }
   for (int i = 0; i < labels2.size(); ++i) {
-    Label label = fst::StrToInt64(labels2[i], "context end", 1, false);
+    Label label = fst::StrToInt64(labels2[i], "context end", 1);
     context_end->push_back(label);
   }
 }
@@ -222,11 +236,11 @@ void NGramExtendedContext::MergeContexts(size_t i, size_t j, size_t k) {
 }
 
 void NGramExtendedContext::ParseContextIntervals(
-    const std::string &extended_context_pattern, int hi_order,
+    std::string_view extended_context_pattern, int hi_order,
     std::vector<NGramContext> *contexts) {
   contexts->clear();
   std::vector<std::string_view> context_patterns =
-      ::fst::StrSplit(extended_context_pattern, ',', ::fst::SkipEmpty());
+      StrSplit(extended_context_pattern, ',', fst::SkipEmpty());
 
   for (size_t i = 0; i < context_patterns.size(); ++i)
     contexts->push_back(NGramContext(context_patterns[i], hi_order));
@@ -240,7 +254,7 @@ bool NGramExtendedContext::HasContext(const std::vector<Label> &ngram,
     return GetContext(ngram, include_all_suffixes) != nullptr;
 }
 
-const NGramContext *NGramExtendedContext::GetContext(
+const NGramContext * NGramExtendedContext::GetContext(
     const std::vector<Label> &ngram, bool include_all_suffixes) const {
   std::vector<Label> ngram_end(ngram);
   if (ngram_end.empty()) ngram_end.push_back(0);

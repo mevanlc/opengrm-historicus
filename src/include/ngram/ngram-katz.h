@@ -18,11 +18,13 @@
 #ifndef NGRAM_NGRAM_KATZ_H_
 #define NGRAM_NGRAM_KATZ_H_
 
+#include <cmath>
 #include <vector>
 
-#include <fst/flags.h>
+#include <fst/mutable-fst.h>
 #include <ngram/ngram-count-of-counts.h>
 #include <ngram/ngram-make.h>
+#include <ngram/ngram-model.h>
 #include <ngram/util.h>
 
 namespace ngram {

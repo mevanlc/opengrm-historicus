@@ -19,11 +19,15 @@
 #ifndef NGRAM_NGRAM_COMPLETE_H_
 #define NGRAM_NGRAM_COMPLETE_H_
 
+#include <set>
+#include <vector>
+
 #include <fst/arcsort.h>
 #include <fst/fst.h>
 #include <fst/matcher.h>
 #include <fst/mutable-fst.h>
 #include <ngram/ngram-model.h>
+#include <ngram/util.h>
 
 namespace ngram {
 

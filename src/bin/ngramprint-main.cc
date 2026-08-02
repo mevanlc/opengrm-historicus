@@ -15,12 +15,16 @@
 //
 // Prints a given n-gram model to various kinds of textual formats.
 
+#include <cstring>
 #include <fstream>
+#include <iostream>
 #include <memory>
 #include <ostream>
 #include <string>
 
 #include <fst/flags.h>
+#include <fst/mutable-fst.h>
+#include <fst/symbol-table.h>
 #include <ngram/ngram-output.h>
 
 DECLARE_bool(ARPA);
@@ -38,7 +42,6 @@ int ngramprint_main(int argc, char **argv) {
   std::string usage = "Print n-gram counts and models.\n\n  Usage: ";
   usage += argv[0];
   usage += " [--options] [in.fst [out.txt]]\n";
-  std::set_new_handler(FailedNewHandler);
   SET_FLAGS(usage.c_str(), &argc, &argv, true);
 
   if (argc > 3) {

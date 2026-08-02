@@ -19,9 +19,12 @@
 #define NGRAM_NGRAM_HIST_MERGE_H_
 
 #include <array>
+#include <cmath>
 
+#include <fst/mutable-fst.h>
 #include <ngram/hist-arc.h>
 #include <ngram/ngram-merge.h>
+#include <ngram/ngram-model.h>
 #include <ngram/util.h>
 
 namespace ngram {

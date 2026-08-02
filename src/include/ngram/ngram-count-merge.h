@@ -18,7 +18,9 @@
 #ifndef NGRAM_NGRAM_COUNT_MERGE_H_
 #define NGRAM_NGRAM_COUNT_MERGE_H_
 
+#include <fst/arc.h>
 #include <ngram/ngram-merge.h>
+#include <ngram/ngram-model.h>
 #include <ngram/util.h>
 
 namespace ngram {

@@ -18,9 +18,12 @@
 #ifndef NGRAM_NGRAM_WITTEN_BELL_H_
 #define NGRAM_NGRAM_WITTEN_BELL_H_
 
+#include <cmath>
 #include <vector>
 
+#include <fst/arc.h>
 #include <ngram/ngram-make.h>
+#include <ngram/ngram-model.h>
 
 namespace ngram {
 

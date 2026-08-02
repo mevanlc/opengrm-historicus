@@ -21,11 +21,18 @@
 #include <cstdint>
 #include <string>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 #include <fst/log.h>
 #include <fst/extensions/far/far.h>
+#include <fst/arc.h>
+#include <fst/fst.h>
 #include <fst/fstlib.h>
+#include <fst/mutable-fst.h>
+#include <fst/properties.h>
+#include <fst/symbol-table.h>
+#include <fst/vector-fst.h>
 #include <ngram/hist-arc.h>
 #include <ngram/ngram-count-of-counts.h>
 #include <ngram/ngram-model.h>
@@ -505,7 +512,7 @@ bool GetNGramHistograms(fst::FarReader<fst::StdArc> *far_reader,
 template <class Arc>
 void GetNGramCountOfCounts(const fst::Fst<Arc> &fst,
                            fst::StdMutableFst *ccfst, int in_order,
-                           const std::string &context_pattern) {
+                           std::string_view context_pattern) {
   NGramModel<Arc> ngram(fst, 0, kNormEps, !context_pattern.empty());
   int order = ngram.HiOrder() > in_order ? ngram.HiOrder() : in_order;
   NGramCountOfCounts<Arc> count_of_counts(context_pattern, order);

@@ -21,8 +21,10 @@
 #include <string>
 #include <vector>
 
+#include <fst/arc.h>
 #include <ngram/ngram-context.h>
 #include <ngram/ngram-count-prune.h>
+#include <ngram/ngram-model.h>
 #include <ngram/ngram-relentropy.h>
 #include <ngram/ngram-seymore-shrink.h>
 #include <ngram/ngram-shrink.h>
@@ -38,7 +40,7 @@ class NGramContextPrune : public NGramShrink<fst::StdArc> {
   // pruned from the model; all others will be (where possible to maintain a
   // well-formed LM).
   explicit NGramContextPrune(fst::StdMutableFst *infst,
-                             const std::string &context_pattern = "",
+                             std::string_view context_pattern = "",
                              int shrink_opt = 0, double tot_uni = -1.0,
                              Label backoff_label = 0,
                              double norm_eps = kNormEps,
@@ -63,7 +65,7 @@ class NGramContextPrune : public NGramShrink<fst::StdArc> {
       : NGramShrink(infst, shrink_opt < 2 ? shrink_opt : 0, tot_uni,
                     backoff_label, norm_eps, true),
         context_(context_begin, context_end, HiOrder()) {}
-  ~NGramContextPrune() override {}
+  ~NGramContextPrune() override = default;
 
   // Shrinks n-gram model, based on initialized parameters
   bool ShrinkNGramModel() {
@@ -90,7 +92,7 @@ class NGramContextCountPrune : public NGramCountPrune {
  public:
   NGramContextCountPrune(fst::StdMutableFst *infst,
                          const std::string &count_pattern,
-                         const std::string &context_pattern, int shrink_opt = 0,
+                         std::string_view context_pattern, int shrink_opt = 0,
                          double tot_uni = -1.0, Label backoff_label = 0,
                          double norm_eps = kNormEps,
                          bool check_consistency = false)
@@ -111,7 +113,7 @@ class NGramContextCountPrune : public NGramCountPrune {
                         tot_uni, backoff_label, norm_eps, true),
         context_(context_begin, context_end, HiOrder()) {}
 
-  ~NGramContextCountPrune() override {}
+  ~NGramContextCountPrune() override = default;
 
   // Shrinks n-gram model, based on initialized parameters
   bool ShrinkNGramModel(int min_order = 2) {
@@ -139,7 +141,7 @@ class NGramContextCountPrune : public NGramCountPrune {
 class NGramContextRelEntropy : public NGramRelEntropy {
  public:
   NGramContextRelEntropy(fst::StdMutableFst *infst, double theta,
-                         const std::string &context_pattern, int shrink_opt = 0,
+                         std::string_view context_pattern, int shrink_opt = 0,
                          double tot_uni = -1.0, Label backoff_label = 0,
                          double norm_eps = kNormEps,
                          bool check_consistency = false)
@@ -159,7 +161,7 @@ class NGramContextRelEntropy : public NGramRelEntropy {
                         backoff_label, norm_eps, true),
         context_(context_begin, context_end, HiOrder()) {}
 
-  ~NGramContextRelEntropy() override {}
+  ~NGramContextRelEntropy() override = default;
 
   // Shrinks n-gram model, based on initialized parameters
   bool ShrinkNGramModel(int min_order = 2) {
@@ -188,7 +190,7 @@ class NGramContextRelEntropy : public NGramRelEntropy {
 class NGramContextSeymoreShrink : public NGramSeymoreShrink {
  public:
   NGramContextSeymoreShrink(fst::StdMutableFst *infst, double theta,
-                            const std::string &context_pattern,
+                            std::string_view context_pattern,
                             int shrink_opt = 0, double tot_uni = -1.0,
                             Label backoff_label = 0, double norm_eps = kNormEps,
                             bool check_consistency = false)
@@ -208,7 +210,7 @@ class NGramContextSeymoreShrink : public NGramSeymoreShrink {
                            tot_uni, backoff_label, norm_eps, true),
         context_(context_begin, context_end, HiOrder()) {}
 
-  ~NGramContextSeymoreShrink() override {}
+  ~NGramContextSeymoreShrink() override = default;
 
   // Shrinks n-gram model, based on initialized parameters
   bool ShrinkNGramModel(int min_order = 2) {

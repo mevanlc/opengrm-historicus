@@ -18,13 +18,16 @@
 #include <ngram/hist-arc.h>
 
 #include <fst/const-fst.h>
-#include <fst/fst.h>
+#include <fst/register.h>
+#include <fst/vector-fst.h>
+#include <fst/script/fst-class.h>
 #include <fst/script/fstscript.h>
+#include <fst/script/weight-class.h>
 
 namespace fst {
 namespace script {
 
-using ngram::HistogramArc;
+using ::ngram::HistogramArc;
 
 REGISTER_FST(ConstFst, HistogramArc);
 REGISTER_FST(VectorFst, HistogramArc);

@@ -18,6 +18,7 @@
 #ifndef NGRAM_NGRAM_RELENTROPY_H_
 #define NGRAM_NGRAM_RELENTROPY_H_
 
+#include <fst/arc.h>
 #include <ngram/ngram-shrink.h>
 
 namespace ngram {

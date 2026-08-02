@@ -17,13 +17,17 @@
 
 #include <ngram/ngram-count-prune.h>
 
+#include <cmath>
 #include <sstream>
+#include <string>
 
+#include <fst/arc.h>
+#include <ngram/ngram-model.h>
 #include <ngram/util.h>
 
 namespace ngram {
 
-using fst::StdArc;
+using ::fst::StdArc;
 
 // Reads from string while token is a numerical value
 template <class T>

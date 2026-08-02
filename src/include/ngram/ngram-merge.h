@@ -18,14 +18,18 @@
 #ifndef NGRAM_NGRAM_MERGE_H_
 #define NGRAM_NGRAM_MERGE_H_
 
+#include <cstddef>
 #include <cstdint>
 #include <map>
-#include <set>
 #include <string>
+#include <utility>
 
 #include <fst/arcsort.h>
+#include <fst/mutable-fst.h>
 #include <fst/vector-fst.h>
+#include <ngram/ngram-model.h>
 #include <ngram/ngram-mutable-model.h>
+#include <ngram/util.h>
 
 namespace ngram {
 

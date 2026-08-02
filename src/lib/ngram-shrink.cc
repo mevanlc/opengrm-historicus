@@ -16,7 +16,12 @@
 #include <ngram/ngram-shrink.h>
 
 #include <cstdint>
+#include <set>
+#include <string>
+#include <vector>
 
+#include <fst/arc.h>
+#include <fst/mutable-fst.h>
 #include <ngram/ngram-context-prune.h>
 #include <ngram/ngram-count-prune.h>
 #include <ngram/ngram-list-prune.h>
@@ -29,7 +34,7 @@ namespace impl {
 namespace {
 
 // Checks several of the parameters to make sure they are consistent.
-void CheckShrinkOptions(const std::string &method, int64_t target_num,
+void CheckShrinkOptions(std::string_view method, int64_t target_num,
                         bool full_context, int min_order) {
   if (target_num >= 0) {
     if (method == "context_prune" || method == "count_prune") {
@@ -50,7 +55,7 @@ void CheckShrinkOptions(const std::string &method, int64_t target_num,
 bool NGramShrinkModel(fst::StdMutableFst *fst, const std::string &method,
                       double tot_uni, double theta, int64_t target_num,
                       int32_t min_order, const std::string &count_pattern,
-                      const std::string &context_pattern, int shrink_opt,
+                      std::string_view context_pattern, int shrink_opt,
                       fst::StdArc::Label backoff_label, double norm_eps,
                       bool check_consistency) {
   return NGramShrinkModel(
@@ -64,7 +69,7 @@ bool NGramShrinkModel(
     fst::StdMutableFst *fst, const std::string &method,
     const std::set<std::vector<fst::StdArc::Label>> &ngram_list,
     double tot_uni, double theta, int64_t target_num, int32_t min_order,
-    const std::string &count_pattern, const std::string &context_pattern,
+    const std::string &count_pattern, std::string_view context_pattern,
     int shrink_opt, fst::StdArc::Label backoff_label, double norm_eps,
     bool check_consistency) {
   bool full_context = context_pattern.empty();

@@ -19,12 +19,14 @@
 #define NGRAM_NGRAM_MUTABLE_MODEL_H_
 
 #include <algorithm>
+#include <cstddef>
 #include <vector>
 
 #include <fst/arcsort.h>
+#include <fst/expanded-fst.h>
 #include <fst/mutable-fst.h>
 #include <fst/statesort.h>
-#include <fst/vector-fst.h>
+#include <ngram/hist-arc.h>
 #include <ngram/ngram-model.h>
 #include <ngram/util.h>
 

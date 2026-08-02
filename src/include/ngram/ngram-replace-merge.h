@@ -18,7 +18,12 @@
 #ifndef NGRAM_NGRAM_REPLACE_MERGE_H_
 #define NGRAM_NGRAM_REPLACE_MERGE_H_
 
+#include <vector>
+
+#include <fst/arc.h>
+#include <fst/connect.h>
 #include <ngram/ngram-merge.h>
+#include <ngram/ngram-model.h>
 #include <ngram/util.h>
 
 namespace ngram {
