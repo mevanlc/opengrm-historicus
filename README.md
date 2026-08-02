@@ -11,8 +11,8 @@ This library is primarily developed by [Brian Roark](mailto:roark@google.com).
 This library depends on:
 
 *   A standards-compliant C++17 compiler (GCC \>= 7 or Clang \>= 700)
-*   The most recent version of [OpenFst](http://openfst.org) built with the
-    `grm` extensions (i.e., built with `./configure --enable-grm`) and headers
+*   [OpenFst](http://openfst.org) 1.8.4 built with the `grm` extensions (i.e.,
+    with `./configure --enable-grm`) and headers
 
 ## Installation instructions
 

@@ -79,8 +79,8 @@ class NGramOutput : public NGramMutableModel<fst::StdArc> {
 
   // Use n-gram model to calculate perplexity of input strings.
   bool PerplexityNGramModel(
-      const std::vector<std::unique_ptr<fst::StdVectorFst>> &infsts,
-      int32_t v, bool phimatch, std::string *OOV_symbol, double OOV_class_size,
+      const std::vector<std::unique_ptr<fst::StdVectorFst>> &infsts, int32_t v,
+      bool phimatch, std::string *OOV_symbol, double OOV_class_size,
       double OOV_probability);
 
   // Extract random samples from model and output
@@ -90,31 +90,29 @@ class NGramOutput : public NGramMutableModel<fst::StdArc> {
     RandNGramModel(samples, show_backoff);  // randgen from resulting model
   }
 
-  typedef fst::PhiMatcher<fst::Matcher<fst::Fst<fst::StdArc>>>
-      NGPhiMatcher;
+  typedef fst::PhiMatcher<fst::Matcher<fst::Fst<fst::StdArc>>> NGPhiMatcher;
 
-  fst::ComposeFst<fst::StdArc> *FailLMCompose(
-      const fst::StdMutableFst &infst, Label special_label) const {
-    fst::ComposeFst<fst::StdArc> *cfst =
-        new fst::ComposeFst<fst::StdArc>(
-            infst, GetFst(),
-            fst::ComposeFstOptions<fst::StdArc, NGPhiMatcher>(
-                fst::CacheOptions(),
-                new NGPhiMatcher(infst, fst::MATCH_NONE, fst::kNoLabel),
-                new NGPhiMatcher(GetFst(), fst::MATCH_INPUT, special_label,
-                                 true, fst::MATCHER_REWRITE_NEVER)));
+  fst::ComposeFst<fst::StdArc> *FailLMCompose(const fst::StdMutableFst &infst,
+                                              Label special_label) const {
+    fst::ComposeFst<fst::StdArc> *cfst = new fst::ComposeFst<fst::StdArc>(
+        infst, GetFst(),
+        fst::ComposeFstOptions<fst::StdArc, NGPhiMatcher>(
+            fst::CacheOptions(),
+            new NGPhiMatcher(infst, fst::MATCH_NONE, fst::kNoLabel),
+            new NGPhiMatcher(GetFst(), fst::MATCH_INPUT, special_label, true,
+                             fst::MATCHER_REWRITE_NEVER)));
     return cfst;
   }
 
-  void FailLMCompose(const fst::StdMutableFst &infst,
-                     fst::StdMutableFst *ofst, Label special_label) const {
+  void FailLMCompose(const fst::StdMutableFst &infst, fst::StdMutableFst *ofst,
+                     Label special_label) const {
     *ofst = fst::ComposeFst<fst::StdArc>(
         infst, GetFst(),
         fst::ComposeFstOptions<fst::StdArc, NGPhiMatcher>(
             fst::CacheOptions(),
             new NGPhiMatcher(infst, fst::MATCH_NONE, fst::kNoLabel),
-            new NGPhiMatcher(GetFst(), fst::MATCH_INPUT, special_label,
-                             true, fst::MATCHER_REWRITE_NEVER)));
+            new NGPhiMatcher(GetFst(), fst::MATCH_INPUT, special_label, true,
+                             fst::MATCHER_REWRITE_NEVER)));
   }
 
   // Switch backoff label to special label for phi matcher
@@ -123,10 +121,10 @@ class NGramOutput : public NGramMutableModel<fst::StdArc> {
 
   // Apply n-gram model to fst.  For now, assumes linear fst, accumulates stats
   double ApplyNGramToFst(const fst::StdVectorFst &input_fst,
-                         const fst::Fst<fst::StdArc> &symbolfst,
-                         bool phimatch, bool verbose, Label special_label,
-                         Label OOV_label, double OOV_cost, double *logprob,
-                         int *words, int *oovs, int *words_skipped);
+                         const fst::Fst<fst::StdArc> &symbolfst, bool phimatch,
+                         bool verbose, Label special_label, Label OOV_label,
+                         double OOV_cost, double *logprob, int *words,
+                         int *oovs, int *words_skipped);
 
   // Adds a phi loop (rho) at unigram state for OOVs
   // OOV_class_size (N) and OOV_probability (p) determine weight of loop: p/N
@@ -163,15 +161,13 @@ class NGramOutput : public NGramMutableModel<fst::StdArc> {
   void RelabelAndSetSymbols(fst::StdMutableFst *infst,
                             const fst::Fst<fst::StdArc> &symbolfst);
 
-  void ShowPhiPerplexity(const fst::ComposeFst<fst::StdArc> &cfst,
-                         bool verbose, int special_label, Label OOV_label,
-                         double *logprob, int *words, int *oovs,
-                         int *words_skipped) const;
+  void ShowPhiPerplexity(const fst::ComposeFst<fst::StdArc> &cfst, bool verbose,
+                         int special_label, Label OOV_label, double *logprob,
+                         int *words, int *oovs, int *words_skipped) const;
 
-  void ShowNonPhiPerplexity(const fst::Fst<fst::StdArc> &infst,
-                            bool verbose, double OOV_cost, Label OOV_label,
-                            double *logprob, int *words, int *oovs,
-                            int *words_skipped) const;
+  void ShowNonPhiPerplexity(const fst::Fst<fst::StdArc> &infst, bool verbose,
+                            double OOV_cost, Label OOV_label, double *logprob,
+                            int *words, int *oovs, int *words_skipped) const;
 
   void FindNextStateInModel(StateId *mst, Label label, double OOV_cost,
                             Label OOV_label, double *neglogprob, int *word_cnt,

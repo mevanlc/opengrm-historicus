@@ -28,9 +28,11 @@
 #include <fst/flags.h>
 #include <fst/arc.h>
 #include <fst/arcsort.h>
+#include <fst/compose.h>
 #include <fst/expanded-fst.h>
 #include <fst/float-weight.h>
 #include <fst/fst.h>
+#include <fst/matcher.h>
 #include <fst/mutable-fst.h>
 #include <fst/vector-fst.h>
 #include <ngram/util.h>

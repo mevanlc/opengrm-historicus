@@ -94,8 +94,8 @@ class NGramModel {
   // this class explicitly finds, checks the consistency of and stores
   // the ngram that must be read to reach each state (normally false
   // to save some time and space).
-  NGramModel(const fst::Fst<Arc> &infst, Label backoff_label,
-             double norm_eps, bool state_ngrams)
+  NGramModel(const fst::Fst<Arc> &infst, Label backoff_label, double norm_eps,
+             bool state_ngrams)
       : fst_(infst),
         backoff_label_(backoff_label),
         norm_eps_(norm_eps),
@@ -502,8 +502,8 @@ class NGramModel {
     bool first = true;
     double max = fst::LogArc::Weight::Zero().Value(), nextmax = max;
     if (st < 0) st = GetFst().Start();  // if model unigram, use Start()
-    for (fst::ArcIterator<fst::Fst<Arc>> aiter(GetFst(), st);
-         !aiter.Done(); aiter.Next()) {
+    for (fst::ArcIterator<fst::Fst<Arc>> aiter(GetFst(), st); !aiter.Done();
+         aiter.Next()) {
       Arc arc = aiter.Value();
       if (arc.ilabel == BackoffLabel()) continue;
       if (first || ScalarValue(arc.weight) > max) {
@@ -570,8 +570,7 @@ class NGramModel {
 
   // Uses iterator in place of matcher for arc iterators; allows
   // getting Position(). NB: begins search from current position.
-  bool FindArc(fst::ArcIterator<fst::Fst<Arc>> *biter,
-               Label label) const {
+  bool FindArc(fst::ArcIterator<fst::Fst<Arc>> *biter, Label label) const {
     while (!biter->Done()) {  // scan through arcs
       Arc barc = biter->Value();
       if (barc.ilabel == label)
@@ -764,8 +763,8 @@ class NGramModel {
     while (!state_queue.empty()) {
       StateId state = state_queue.front();
       state_queue.pop_front();
-      for (fst::ArcIterator<fst::Fst<Arc>> aiter(fst_, state);
-           !aiter.Done(); aiter.Next()) {
+      for (fst::ArcIterator<fst::Fst<Arc>> aiter(fst_, state); !aiter.Done();
+           aiter.Next()) {
         const Arc &arc = aiter.Value();
         if (state_orders_[arc.nextstate] == -1) {
           state_orders_[arc.nextstate] = state_orders_[state] + 1;
@@ -954,8 +953,8 @@ class NGramModel {
         if (bocost < 0)  // Backoff cost > 0 (can't happen with mixture)
           return false;
         matcher.SetState(bo);
-        for (fst::ArcIterator<fst::Fst<Arc>> aiter(fst_, st);
-             !aiter.Done(); aiter.Next()) {
+        for (fst::ArcIterator<fst::Fst<Arc>> aiter(fst_, st); !aiter.Done();
+             aiter.Next()) {
           Arc arc = aiter.Value();
           if (arc.ilabel == backoff_label_) {
             continue;
@@ -1140,8 +1139,8 @@ inline typename HistogramArc::Weight NGramModel<HistogramArc>::UnitCount() {
   weights.fill(fst::StdArc::Weight::Zero());
   if (kHistogramBins > 0) weights[0] = fst::StdArc::Weight::One();
   if (kHistogramBins > 2) weights[2] = fst::StdArc::Weight::One();
-  static const fst::PowerWeight<fst::StdArc::Weight, kHistogramBins>
-      one(weights.begin(), weights.end());
+  static const fst::PowerWeight<fst::StdArc::Weight, kHistogramBins> one(
+      weights.begin(), weights.end());
   return one;
 }
 

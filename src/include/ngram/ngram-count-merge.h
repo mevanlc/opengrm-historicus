@@ -33,15 +33,15 @@ class NGramCountMerge : public NGramMerge<fst::StdArc> {
   // Constructs an NGramCountMerge object consisting of ngram model
   // to be merged.
   // Ownership of FST is retained by the caller.
-  explicit NGramCountMerge(fst::StdMutableFst *infst1,
-                           Label backoff_label = 0, double norm_eps = kNormEps,
+  explicit NGramCountMerge(fst::StdMutableFst *infst1, Label backoff_label = 0,
+                           double norm_eps = kNormEps,
                            bool check_consistency = false)
       : NGramMerge(infst1, backoff_label, norm_eps, check_consistency) {}
 
   // Perform count-model merger with n-gram model specified by the FST argument
   // and mixing weights alpha and beta.
-  void MergeNGramModels(const fst::StdFst &infst2, double alpha,
-                        double beta, bool norm = false) {
+  void MergeNGramModels(const fst::StdFst &infst2, double alpha, double beta,
+                        bool norm = false) {
     alpha_ = -log(alpha);
     beta_ = -log(beta);
     if (!NGramMerge<fst::StdArc>::MergeNGramModels(infst2, norm)) {

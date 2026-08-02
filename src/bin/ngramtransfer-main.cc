@@ -153,8 +153,7 @@ int ngramtransfer_main(int argc, char **argv) {
     if (!Transfer<ngram::HistogramArc>(out_name_prefix, in_count, argv))
       return 1;
   } else if (FST_FLAGS_method == "count_transfer") {
-    if (!Transfer<fst::StdArc>(out_name_prefix, in_count, argv))
-      return 1;
+    if (!Transfer<fst::StdArc>(out_name_prefix, in_count, argv)) return 1;
   } else {
     LOG(ERROR) << argv[0]
                << ": bad transfer method: " << FST_FLAGS_method;

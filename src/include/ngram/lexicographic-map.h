@@ -86,9 +86,7 @@ struct ToLexicographicMapper {
     }
   }
 
-  fst::MapFinalAction FinalAction() const {
-    return fst::MAP_NO_SUPERFINAL;
-  }
+  fst::MapFinalAction FinalAction() const { return fst::MAP_NO_SUPERFINAL; }
 
   fst::MapSymbolsAction InputSymbolsAction() const {
     return fst::MAP_COPY_SYMBOLS;
@@ -123,9 +121,7 @@ struct FromLexicographicMapper {
     }
   }
 
-  fst::MapFinalAction FinalAction() const {
-    return fst::MAP_NO_SUPERFINAL;
-  }
+  fst::MapFinalAction FinalAction() const { return fst::MAP_NO_SUPERFINAL; }
 
   fst::MapSymbolsAction InputSymbolsAction() const {
     return fst::MAP_COPY_SYMBOLS;

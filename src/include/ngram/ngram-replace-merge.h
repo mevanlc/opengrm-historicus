@@ -48,12 +48,12 @@ class NGramReplaceMerge : public NGramMerge<fst::StdArc> {
   // assumed that infst2 has a superset of n-grams contained in the first model.
   // Resulting model will have up to and including max_replace_order orders of
   // the model from infst2, and any orders above that max from infst1.
-  void MergeNGramModels(const fst::StdFst &infst2,
-                        int max_replace_order = -1, bool norm = false) {
+  void MergeNGramModels(const fst::StdFst &infst2, int max_replace_order = -1,
+                        bool norm = false) {
     if (Error()) return;
     NGramModel<fst::StdArc> mod2(infst2);
-    if (!NGramMerge<fst::StdArc>::MergeNGramModels(
-            infst2, /* norm = */ false, max_replace_order)) {
+    if (!NGramMerge<fst::StdArc>::MergeNGramModels(infst2, /* norm = */ false,
+                                                   max_replace_order)) {
       NGRAMERROR() << "NGramReplaceMerge: Model merging failed";
       NGramModel::SetError();
       return;
@@ -107,8 +107,8 @@ class NGramReplaceMerge : public NGramMerge<fst::StdArc> {
       // Ignores dead end states when adjusting arcs.
       if (dest_states[st] != st) continue;
       StateId bo = GetBackoff(st, nullptr);
-      for (fst::MutableArcIterator<fst::MutableFst<fst::StdArc>>
-               aiter(GetMutableFst(), st);
+      for (fst::MutableArcIterator<fst::MutableFst<fst::StdArc>> aiter(
+               GetMutableFst(), st);
            !aiter.Done(); aiter.Next()) {
         fst::StdArc arc = aiter.Value();
         if (dest_states[arc.nextstate] != arc.nextstate) {

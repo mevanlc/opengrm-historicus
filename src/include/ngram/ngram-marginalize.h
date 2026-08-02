@@ -38,10 +38,9 @@ class NGramMarginal : public NGramMutableModel<fst::StdArc> {
   explicit NGramMarginal(fst::StdMutableFst *infst, Label backoff_label = 0,
                          double norm_eps = kNormEps, int max_bo_updates = 10,
                          bool check_consistency = false)
-      : NGramMutableModel<fst::StdArc>(
-            infst, backoff_label, norm_eps,
-            /* state_ngrams= */ check_consistency,
-            /* infinite_backoff= */ false),
+      : NGramMutableModel<fst::StdArc>(infst, backoff_label, norm_eps,
+                                       /* state_ngrams= */ check_consistency,
+                                       /* infinite_backoff= */ false),
         max_bo_updates_(max_bo_updates) {
     ns_ = infst->NumStates();
     for (StateId st = 0; st < ns_; ++st)

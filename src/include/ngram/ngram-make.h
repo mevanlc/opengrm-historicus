@@ -61,9 +61,9 @@ class NGramMake : public NGramMutableModel<Arc> {
   // Construct NGramMake object, consisting of the FST and some
   // information about the states under the assumption that the FST is a model.
   // Ownership of the FST is retained by the caller.
-  NGramMake(fst::MutableFst<Arc> *infst, bool backoff,
-            Label backoff_label = 0, double norm_eps = kNormEps,
-            bool check_consistency = false, bool infinite_backoff = false)
+  NGramMake(fst::MutableFst<Arc> *infst, bool backoff, Label backoff_label = 0,
+            double norm_eps = kNormEps, bool check_consistency = false,
+            bool infinite_backoff = false)
       : NGramMutableModel<Arc>(infst, backoff_label, norm_eps,
                                check_consistency, infinite_backoff),
         backoff_(backoff) {}
@@ -223,8 +223,8 @@ class NGramMake : public NGramMutableModel<Arc> {
     }
     int arc_counter = 0;     // index into backoff weights
     int discount_index = 1;  // index into discounts (off by one, for </s>)
-    for (fst::MutableArcIterator<fst::MutableFst<Arc>> aiter(
-             GetMutableFst(), st);
+    for (fst::MutableArcIterator<fst::MutableFst<Arc>> aiter(GetMutableFst(),
+                                                             st);
          !aiter.Done(); aiter.Next()) {
       Arc arc = aiter.Value();
       if (arc.ilabel != BackoffLabel()) {  // backoff weights calculated later
@@ -242,8 +242,7 @@ class NGramMake : public NGramMutableModel<Arc> {
     double KahanVal = 0.0;
     int order = StateOrder(st) - 1;  // for retrieving discount parameters
     discounts->push_back(GetDiscount(GetFst().Final(st), order));
-    for (fst::ArcIterator<fst::ExpandedFst<Arc>> aiter(GetExpandedFst(),
-                                                               st);
+    for (fst::ArcIterator<fst::ExpandedFst<Arc>> aiter(GetExpandedFst(), st);
          !aiter.Done(); aiter.Next()) {
       Arc arc = aiter.Value();
       if (arc.ilabel != BackoffLabel()) {  // skip backoff arc
@@ -261,11 +260,11 @@ class NGramMake : public NGramMutableModel<Arc> {
 
 // Makes models from NGram count FSTs with StdArc counts.
 bool NGramMakeModel(fst::StdMutableFst *fst, const std::string &method,
-                    const fst::StdFst *ccfst = nullptr,
-                    bool backoff = false, bool interpolate = false,
-                    int64_t bins = -1, double witten_bell_k = 1,
-                    double discount_D = -1.0, int64_t backoff_label = 0,
-                    double norm_eps = kNormEps, bool check_consistency = false);
+                    const fst::StdFst *ccfst = nullptr, bool backoff = false,
+                    bool interpolate = false, int64_t bins = -1,
+                    double witten_bell_k = 1, double discount_D = -1.0,
+                    int64_t backoff_label = 0, double norm_eps = kNormEps,
+                    bool check_consistency = false);
 
 // The same, but uses scripting FSTs.
 bool NGramMakeModel(fst::script::MutableFstClass *fst,

@@ -26,11 +26,10 @@
 
 namespace ngram {
 
-void GetNGramListToPrune(
-    const std::vector<std::string> &ngrams_to_prune,
-    const fst::SymbolTable *syms,
-    std::set<std::vector<fst::StdArc::Label>> *ngram_list,
-    bool retry_downcase) {
+void GetNGramListToPrune(const std::vector<std::string> &ngrams_to_prune,
+                         const fst::SymbolTable *syms,
+                         std::set<std::vector<fst::StdArc::Label>> *ngram_list,
+                         bool retry_downcase) {
   if (syms == nullptr) {
     LOG(WARNING) << "empty symbol table, no means for compiling ngram list.";
     return;

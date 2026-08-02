@@ -47,7 +47,7 @@ class NGramContextPrune : public NGramShrink<fst::StdArc> {
                              bool check_consistency = false)
       // shrink_opt must be less than 2 for context pruning
       : NGramShrink<fst::StdArc>(infst, shrink_opt < 2 ? shrink_opt : 0,
-                                     tot_uni, backoff_label, norm_eps, true),
+                                 tot_uni, backoff_label, norm_eps, true),
         context_(context_pattern, HiOrder()) {}
 
   // Constructs an NGramShrink object, including an NGramModel and

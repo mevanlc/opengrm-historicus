@@ -131,8 +131,8 @@ bool GetSingleCountFst(fst::FarReader<fst::StdArc> *far_reader,
 
 // Computes counts using the HistogramArc template.
 bool GetNGramHistograms(fst::FarReader<fst::StdArc> *far_reader,
-                        fst::VectorFst<HistogramArc> *fst,
-                        int order, bool epsilon_as_backoff, int backoff_label,
+                        fst::VectorFst<HistogramArc> *fst, int order,
+                        bool epsilon_as_backoff, int backoff_label,
                         double norm_eps, bool check_consistency, bool normalize,
                         double alpha, double beta) {
   int fstnumber = 1;
@@ -185,9 +185,9 @@ bool GetNGramsAndSyms(fst::FarReader<fst::StdArc> *far_reader,
 
 // Computes ngram counts and returns ngram format FST.
 bool GetNGramCounts(fst::FarReader<fst::StdArc> *far_reader,
-                    fst::StdMutableFst *fst, int order,
-                    bool require_symbols, bool epsilon_as_backoff,
-                    bool round_to_int, double add_to_symbol_unigram_count) {
+                    fst::StdMutableFst *fst, int order, bool require_symbols,
+                    bool epsilon_as_backoff, bool round_to_int,
+                    double add_to_symbol_unigram_count) {
   NGramCounter<fst::Log64Weight> ngram_counter(order, epsilon_as_backoff);
   fst::SymbolTable syms;
   if (!GetNGramsAndSyms(far_reader, &ngram_counter, &syms, require_symbols,

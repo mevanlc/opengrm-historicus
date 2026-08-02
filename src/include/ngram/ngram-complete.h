@@ -122,8 +122,8 @@ bool NGramComplete(fst::MutableFst<Arc> *fst,
         return false;
       }
       matcher->SetState(bs);
-      for (fst::ArcIterator<fst::Fst<Arc>> aiter(*fst, s);
-           !aiter.Done(); aiter.Next()) {
+      for (fst::ArcIterator<fst::Fst<Arc>> aiter(*fst, s); !aiter.Done();
+           aiter.Next()) {
         const Arc &arc = aiter.Value();
         if (arc.ilabel == backoff_label || matcher->Find(arc.ilabel)) continue;
         label_sets[bs].insert(arc.ilabel);
@@ -175,8 +175,8 @@ bool NGramComplete(fst::MutableFst<Arc> *fst,
         return false;
       }
 
-      for (fst::ArcIterator<fst::Fst<Arc>> aiter(*fst, s);
-           !aiter.Done(); aiter.Next())
+      for (fst::ArcIterator<fst::Fst<Arc>> aiter(*fst, s); !aiter.Done();
+           aiter.Next())
         arcs.push_back(aiter.Value());
 
       fst->DeleteArcs(s);

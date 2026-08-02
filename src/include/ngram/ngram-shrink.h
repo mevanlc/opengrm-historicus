@@ -277,8 +277,7 @@ class NGramShrink : public NGramMutableModel<Arc> {
       if (ScalarValue(GetFst().Final(st)) != ScalarValue(Arc::Weight::Zero())) {
         state_label_data_.emplace_back(fst::kNoLabel);
       }
-      for (fst::ArcIterator<fst::ExpandedFst<Arc>> aiter(
-               GetExpandedFst(), st);
+      for (fst::ArcIterator<fst::ExpandedFst<Arc>> aiter(GetExpandedFst(), st);
            !aiter.Done(); aiter.Next()) {
         Arc arc = aiter.Value();
         if (arc.ilabel != BackoffLabel()) {
@@ -532,8 +531,7 @@ void NGramShrink<Arc>::FillShrinkStateInfo() {
       matcher.SetState(bos);
       shrink_state_[st].state_dead = GetFst().Final(st) == Arc::Weight::Zero();
     }
-    for (fst::ArcIterator<fst::ExpandedFst<Arc>> aiter(GetExpandedFst(),
-                                                               st);
+    for (fst::ArcIterator<fst::ExpandedFst<Arc>> aiter(GetExpandedFst(), st);
          !aiter.Done(); aiter.Next()) {
       Arc arc = aiter.Value();
       if (arc.ilabel == BackoffLabel()) continue;
@@ -605,8 +603,7 @@ void NGramShrink<Arc>::GetNGramsAndOrScoresMinOrder(
     // Skips unigrams if min_order higher, matches prior behavior.
     if (state_ngram.empty() && min_order > 1) continue;
     std::vector<Label> to_update;
-    for (fst::ArcIterator<fst::ExpandedFst<Arc>> aiter(GetExpandedFst(),
-                                                               st);
+    for (fst::ArcIterator<fst::ExpandedFst<Arc>> aiter(GetExpandedFst(), st);
          !aiter.Done(); aiter.Next()) {
       Arc arc = aiter.Value();
       if (arc.ilabel == BackoffLabel()) continue;
@@ -728,17 +725,16 @@ size_t NGramShrink<Arc>::FillShrinkArcInfo(
     CalculateBackoffFactors(hi_neglog_sum, low_neglog_sum, &nlog_backoff_num_,
                             &nlog_backoff_denom_);
   }
-  fst::Matcher<fst::Fst<Arc>> matcher(
-      GetFst(), fst::MATCH_INPUT);  // to find backoff
+  fst::Matcher<fst::Fst<Arc>> matcher(GetFst(),
+                                      fst::MATCH_INPUT);  // to find backoff
   matcher.SetState(shrink_state_[st].backoff_state);
-  for (fst::ArcIterator<fst::ExpandedFst<Arc>> aiter(GetExpandedFst(),
-                                                             st);
+  for (fst::ArcIterator<fst::ExpandedFst<Arc>> aiter(GetExpandedFst(), st);
        !aiter.Done(); aiter.Next()) {
     Arc arc = aiter.Value();
     if (arc.ilabel == BackoffLabel()) {
       // placeholder
-      shrink_arcs->push_back(ShrinkArcStats(
-          0, 0, arc.ilabel, fst::kNoStateId, fst::kNoStateId, true));
+      shrink_arcs->push_back(ShrinkArcStats(0, 0, arc.ilabel, fst::kNoStateId,
+                                            fst::kNoStateId, true));
     } else if (matcher.Find(arc.ilabel)) {
       Arc barc = matcher.Value();
       candidates += AddArcStat(shrink_arcs, st, &arc, &barc, calc_score);
@@ -846,8 +842,7 @@ size_t NGramShrink<Arc>::PointPrunedArcs(
     const std::vector<ShrinkArcStats> &shrink_arcs, StateId st) {
   size_t acnt = 0;
   size_t pruned_cnt = 0;
-  for (fst::MutableArcIterator<fst::MutableFst<Arc>> aiter(
-           GetMutableFst(), st);
+  for (fst::MutableArcIterator<fst::MutableFst<Arc>> aiter(GetMutableFst(), st);
        !aiter.Done(); aiter.Next()) {
     Arc arc = aiter.Value();
     if (shrink_arcs[acnt].pruned) {
@@ -902,8 +897,8 @@ template <class Arc>
 void NGramShrink<Arc>::PointArcsAwayFromDead() {
   for (StateId st = 0; st < ns_; ++st) {
     if (shrink_state_[st].state_dead) continue;
-    for (fst::MutableArcIterator<fst::MutableFst<Arc>> aiter(
-             GetMutableFst(), st);
+    for (fst::MutableArcIterator<fst::MutableFst<Arc>> aiter(GetMutableFst(),
+                                                             st);
          !aiter.Done(); aiter.Next()) {
       Arc arc = aiter.Value();
       if (arc.nextstate != dead_state_) {
@@ -922,8 +917,7 @@ template <class Arc>
 void NGramShrink<Arc>::PointDeadBackoffArcs() {
   for (StateId st = 0; st < ns_; ++st) {
     if (!shrink_state_[st].state_dead || st == GetFst().Start()) continue;
-    fst::MutableArcIterator<fst::MutableFst<Arc>> aiter(GetMutableFst(),
-                                                                st);
+    fst::MutableArcIterator<fst::MutableFst<Arc>> aiter(GetMutableFst(), st);
     if (FindMutableArc(&aiter, BackoffLabel())) {
       Arc arc = aiter.Value();
       arc.nextstate = dead_state_;
@@ -954,8 +948,7 @@ bool NGramShrinkModel(fst::StdMutableFst *fst, const std::string &method,
                       int64_t target_num = -1, int32_t min_order = 2,
                       const std::string &count_pattern = "",
                       std::string_view context_pattern = "",
-                      int shrink_opt = 0,
-                      fst::StdArc::Label backoff_label = 0,
+                      int shrink_opt = 0, fst::StdArc::Label backoff_label = 0,
                       double norm_eps = kNormEps,
                       bool check_consistency = false);
 

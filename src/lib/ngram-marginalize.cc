@@ -17,12 +17,14 @@
 
 #include <ngram/ngram-marginalize.h>
 
+#include <cmath>
 #include <cstddef>
 #include <vector>
 
 #include <fst/arc.h>
 #include <fst/expanded-fst.h>
 #include <fst/fst.h>
+#include <fst/matcher.h>
 #include <fst/mutable-fst.h>
 #include <ngram/ngram-model.h>
 #include <ngram/util.h>

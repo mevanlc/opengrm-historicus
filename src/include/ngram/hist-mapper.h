@@ -75,8 +75,7 @@ class ToHistogramMapper {
  public:
   using FromArc = Arc;
   using ToArc = HistogramArc;
-  using Weight =
-      fst::PowerWeight<fst::TropicalWeight, ::ngram::kHistogramBins>;
+  using Weight = fst::PowerWeight<fst::TropicalWeight, ::ngram::kHistogramBins>;
 
   ToArc operator()(const Arc &arc) const {
     std::array<fst::TropicalWeight, ::ngram::kHistogramBins> weights;

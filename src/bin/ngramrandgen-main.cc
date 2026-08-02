@@ -19,6 +19,7 @@
 #include <unistd.h>
 
 #include <cstring>
+#include <ctime>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -55,8 +56,8 @@ int CalcExtLen(int value, std::string * key, int far_len) {
 }
 
 // Write given fst into open far_writer
-void FarWriteFst(fst::FarWriter<fst::StdArc> *far_writer,
-                 fst::StdFst *fst, int *far_incr, int far_len) {
+void FarWriteFst(fst::FarWriter<fst::StdArc> *far_writer, fst::StdFst *fst,
+                 int *far_incr, int far_len) {
   std::string key = "FST";
   CalcExtLen(++(*far_incr), &key, far_len);
   far_writer->Add(key, *fst);
@@ -70,9 +71,8 @@ void CreateStringFstFromPath(std::vector<int> *labels,
   nfst->SetStart(ost);
   for (int i = 0; i < labels->size(); i++) {
     nfst->AddState();
-    nfst->AddArc(
-        ost++, fst::StdArc((*labels)[i], (*labels)[i],
-                               fst::StdArc::Weight::One().Value(), dst++));
+    nfst->AddArc(ost++, fst::StdArc((*labels)[i], (*labels)[i],
+                                    fst::StdArc::Weight::One().Value(), dst++));
   }
   nfst->SetFinal(ost, fst::StdArc::Weight::One().Value());
 }
@@ -80,8 +80,8 @@ void CreateStringFstFromPath(std::vector<int> *labels,
 // Given an fst (tree) of strings, create far of string fsts
 int WritePathsToFar(fst::StdFst *fst, fst::StdArc::StateId st,
                     std::vector<int> *labels,
-                    fst::FarWriter<fst::StdArc> *far_writer,
-                    int far_cnt, int far_len, int remove_epsilons) {
+                    fst::FarWriter<fst::StdArc> *far_writer, int far_cnt,
+                    int far_len, int remove_epsilons) {
   for (fst::ArcIterator<fst::StdFst> aiter(*fst, st); !aiter.Done();
        aiter.Next()) {
     fst::StdArc arc = aiter.Value();

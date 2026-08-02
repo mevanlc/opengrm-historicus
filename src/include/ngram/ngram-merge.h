@@ -164,7 +164,7 @@ class NGramMerge : public NGramMutableModel<Arc> {
   // Returns false on error.
   bool MergeWordLists() {
     if (fst::CompatSymbols(GetFst().InputSymbols(),
-                               ngram2_->GetFst().InputSymbols(), false))
+                           ngram2_->GetFst().InputSymbols(), false))
       return true;  // nothing to do; symbol tables match
 
     if (!GetFst().InputSymbols() || !ngram2_->GetFst().InputSymbols()) {
@@ -257,8 +257,7 @@ class NGramMerge : public NGramMutableModel<Arc> {
         MergeStateMaps(start1, unigram2, true, bo_from1, true);
         MergeStateMaps(start1, start2, false, false, true);
       }
-    } else if (unigram1 !=
-               fst::kNoStateId) {  // merging unigram into order > 1
+    } else if (unigram1 != fst::kNoStateId) {  // merging unigram into order > 1
       MergeStateMaps(unigram1, start2, true, bo_from1, true);
       MergeStateMaps(start1, start2, false, bo_from1, false);
     } else {  // merging two unigrams
@@ -328,8 +327,8 @@ class NGramMerge : public NGramMutableModel<Arc> {
     for (StateId st = 0; st < ngram1_ns_; ++st) {
       StateId bo = GetBackoff(st, nullptr);
       if (bo < 0) continue;
-      for (fst::ArcIterator<fst::Fst<Arc>> aiter(GetFst(), st);
-           !aiter.Done(); aiter.Next()) {
+      for (fst::ArcIterator<fst::Fst<Arc>> aiter(GetFst(), st); !aiter.Done();
+           aiter.Next()) {
         const Arc &arc = aiter.Value();
         if (arc.ilabel == BackoffLabel()) continue;
         if (StateOrder(st) > StateOrder(arc.nextstate)) {
@@ -410,12 +409,10 @@ class NGramMerge : public NGramMutableModel<Arc> {
   // sets correct destination
   void MergeSharedArcs(StateId st, StateId ist,
                        std::set<Label> *shared) {
-    fst::MutableArcIterator<fst::MutableFst<Arc>> aiter(GetMutableFst(),
-                                                                st);
+    fst::MutableArcIterator<fst::MutableFst<Arc>> aiter(GetMutableFst(), st);
     if (!aiter.Done()) {
       Arc arc = aiter.Value();
-      for (fst::ArcIterator<fst::Fst<Arc>> biter(ngram2_->GetFst(),
-                                                         ist);
+      for (fst::ArcIterator<fst::Fst<Arc>> biter(ngram2_->GetFst(), ist);
            !biter.Done(); biter.Next()) {
         const Arc &barc = biter.Value();
         // Can't use matcher for Mutable fst (full copy made), use iterator
@@ -456,8 +453,8 @@ class NGramMerge : public NGramMutableModel<Arc> {
   void MergeUnsharedArcs1(StateId st, StateId ist,
                           const std::set<Label> &shared) {
     StateId bst = backoff_map_1to2_[st];
-    for (fst::MutableArcIterator<fst::MutableFst<Arc>> aiter(
-             GetMutableFst(), st);
+    for (fst::MutableArcIterator<fst::MutableFst<Arc>> aiter(GetMutableFst(),
+                                                             st);
          !aiter.Done(); aiter.Next()) {
       Arc arc = aiter.Value();
       Weight cost = Weight::Zero();
@@ -526,8 +523,8 @@ class NGramMerge : public NGramMutableModel<Arc> {
       if (ScalarValue(final2) != ScalarValue(Weight::Zero())) {
         int order;
         Weight cost = FinalCostInModel(bst, &order);
-        Weight merge_final = MergeWeights(bst, ist, fst::kNoLabel, cost,
-                                          final2, false, true);
+        Weight merge_final =
+            MergeWeights(bst, ist, fst::kNoLabel, cost, final2, false, true);
         GetMutableFst()->SetFinal(st, merge_final);
       }
     }
@@ -541,16 +538,16 @@ class NGramMerge : public NGramMutableModel<Arc> {
                    StateId new_dest) {
     std::pair<StateId, Label> pr(low_src, label);
 
-    auto it = backed_off_to_.find(pr);
+    auto range = backed_off_to_.equal_range(pr);
 
     bool non_ascending = StateOrder(low_src) >= StateOrder(new_dest);
 
-    while (it != backed_off_to_.end() && it->first == pr) {
+    for (auto it = range.first; it != range.second;) {
       // Is backed_off_to_ entry still needed when we're done here?
       bool needed = non_ascending;
       StateId hi_src = it->second;
-      fst::MutableArcIterator<fst::MutableFst<Arc>> aiter(
-          GetMutableFst(), hi_src);
+      fst::MutableArcIterator<fst::MutableFst<Arc>> aiter(GetMutableFst(),
+                                                          hi_src);
       if (!FindMutableArc(&aiter, label)) {
         NGRAMERROR() << "label not found";
         SetError();
@@ -585,8 +582,7 @@ class NGramMerge : public NGramMutableModel<Arc> {
       return st;
     }
     if (cost) *cost = Arc::Weight::One();
-    fst::Matcher<fst::Fst<Arc>> matcher(ngram->GetFst(),
-                                                fst::MATCH_INPUT);
+    fst::Matcher<fst::Fst<Arc>> matcher(ngram->GetFst(), fst::MATCH_INPUT);
     matcher.SetState(st);
     while (!matcher.Find(label)) {  // while no match found
       Weight thiscost;
@@ -629,8 +625,8 @@ class NGramMerge : public NGramMutableModel<Arc> {
     GetMutableFst()->SetFinal(st, ScaleWeight(GetFst().Final(st), norm));
     double kahan_factor = 0;
     double tot_neg_log_prob = ScalarValue(GetFst().Final(st));
-    for (fst::MutableArcIterator<fst::MutableFst<Arc>> aiter(
-             GetMutableFst(), st);
+    for (fst::MutableArcIterator<fst::MutableFst<Arc>> aiter(GetMutableFst(),
+                                                             st);
          !aiter.Done(); aiter.Next()) {
       Arc arc = aiter.Value();
       if (arc.ilabel != BackoffLabel()) {
@@ -644,8 +640,8 @@ class NGramMerge : public NGramMutableModel<Arc> {
       // Normalizes directly since total probability mass greater than one.
       GetMutableFst()->SetFinal(
           st, ScaleWeight(GetFst().Final(st), -tot_neg_log_prob));
-      for (fst::MutableArcIterator<fst::MutableFst<Arc>> aiter(
-               GetMutableFst(), st);
+      for (fst::MutableArcIterator<fst::MutableFst<Arc>> aiter(GetMutableFst(),
+                                                               st);
            !aiter.Done(); aiter.Next()) {
         Arc arc = aiter.Value();
         if (arc.ilabel != BackoffLabel()) {

@@ -16,6 +16,7 @@
 // Prints out various information about n-gram language models.
 
 #include <cstddef>
+#include <cstring>
 #include <fstream>
 #include <ios>
 #include <iostream>
@@ -37,8 +38,7 @@ DECLARE_double(norm_eps);
 
 namespace ngram {
 
-void PrintNGramInfo(const NGramModel<fst::StdArc> &ngram,
-                    std::ostream &ostrm) {
+void PrintNGramInfo(const NGramModel<fst::StdArc> &ngram, std::ostream &ostrm) {
   const fst::StdFst &fst = ngram.GetFst();
   std::vector<size_t> order_ngrams(ngram.HiOrder(), 0);
   size_t ngrams = 0;
@@ -121,9 +121,8 @@ int ngraminfo_main(int argc, char **argv) {
     }
   }
   std::ostream &ostrm = ofstrm.is_open() ? ofstrm : std::cout;
-  ngram::NGramModel<fst::StdArc> ngram(
-      *fst, 0, FST_FLAGS_norm_eps,
-      FST_FLAGS_check_consistency);
+  ngram::NGramModel<fst::StdArc> ngram(*fst, 0, FST_FLAGS_norm_eps,
+                                       FST_FLAGS_check_consistency);
   if (FST_FLAGS_check_consistency && !ngram.CheckTopology()) {
     NGRAMERROR() << "Bad ngram model topology";
     return 1;

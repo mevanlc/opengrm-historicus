@@ -107,8 +107,7 @@ class NGramAbsolute : public NGramMake<fst::StdArc> {
 
   double parameter_;  // Absolute Discounting D
   int bins_;          // number of bins for discounting
-  NGramCountOfCounts<fst::StdArc>
-      count_of_counts_;  // count bins for orders
+  NGramCountOfCounts<fst::StdArc> count_of_counts_;  // count bins for orders
   std::vector<std::vector<double> > discount_;            // discount for bins
 };
 

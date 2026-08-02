@@ -138,9 +138,9 @@ class NGramInput {
                    bool endsym, double ngram_log_prob);
 
   // Reads in n-grams for the particular order.
-  void ReadARPAOrder(
-      std::vector<int> *orders, int order, std::vector<double> *boweights,
-      NGramCounter<fst::LogWeightTpl<double>> *ngram_counter);
+  void ReadARPAOrder(std::vector<int> *orders, int order,
+                     std::vector<double> *boweights,
+                     NGramCounter<fst::LogWeightTpl<double>> *ngram_counter);
 
   StateId FindNewDest(StateId st);
 

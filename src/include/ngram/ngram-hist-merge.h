@@ -107,8 +107,8 @@ class NGramHistMerge : public NGramMerge<HistogramArc> {
                                                    w2.Value(k - j + 1).Value());
       }
     }
-    return fst::PowerWeight<fst::TropicalWeight, kHistogramBins>(
-        v.begin(), v.end());
+    return fst::PowerWeight<fst::TropicalWeight, kHistogramBins>(v.begin(),
+                                                                 v.end());
   }
 
   double alpha_;  // weight to scale model ngram1

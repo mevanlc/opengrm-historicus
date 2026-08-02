@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <cstring>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -90,9 +91,8 @@ bool SplitToFar(fst::VectorFst<Arc> *fst,
   ngram::NGramSplit<Arc> split(*fst, sorted_context_patterns,
                                FST_FLAGS_backoff_label,
                                FST_FLAGS_norm_eps);
-  std::unique_ptr<fst::FarWriter<Arc>> far_writer(
-      fst::FarWriter<Arc>::Create(out_name_prefix + "split_fsts.far",
-                                      input_far_type));
+  std::unique_ptr<fst::FarWriter<Arc>> far_writer(fst::FarWriter<Arc>::Create(
+      out_name_prefix + "split_fsts.far", input_far_type));
   if (!far_writer) {
     NGRAMERROR() << "Can't open " << out_name_prefix
                  << "split_fsts.far for writing";
@@ -112,8 +112,7 @@ bool CountOrHistogramSplit(std::string_view in_name,
                            const std::vector<std::string> &context_patterns,
                            const std::string &out_name_prefix,
                            const std::string &input_far_type_str) {
-  std::unique_ptr<fst::VectorFst<Arc>> fst(
-      fst::VectorFst<Arc>::Read(in_name));
+  std::unique_ptr<fst::VectorFst<Arc>> fst(fst::VectorFst<Arc>::Read(in_name));
   if (!fst ||
       (FST_FLAGS_complete && !ngram::NGramComplete(fst.get()))) {
     return true;
@@ -165,9 +164,9 @@ int ngramsplit_main(int argc, char **argv) {
   }
 
   if (FST_FLAGS_method == "count_split") {
-    return CountOrHistogramSplit<fst::StdArc>(
-        in_name, context_patterns, out_name_prefix,
-        FST_FLAGS_far_type);
+    return CountOrHistogramSplit<fst::StdArc>(in_name, context_patterns,
+                                              out_name_prefix,
+                                              FST_FLAGS_far_type);
   } else if (FST_FLAGS_method == "histogram_split") {
     return CountOrHistogramSplit<ngram::HistogramArc>(
         in_name, context_patterns, out_name_prefix,

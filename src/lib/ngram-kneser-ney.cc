@@ -17,9 +17,12 @@
 
 #include <ngram/ngram-kneser-ney.h>
 
+#include <cmath>
+
 #include <fst/arc.h>
 #include <fst/arcsort.h>
 #include <fst/expanded-fst.h>
+#include <fst/fst.h>
 #include <fst/mutable-fst.h>
 #include <fst/vector-fst.h>
 #include <ngram/ngram-absolute.h>

@@ -32,7 +32,7 @@ class NGramSeymoreShrink : public NGramShrink<fst::StdArc> {
                      Label backoff_label = 0, double norm_eps = kNormEps,
                      bool check_consistency = false)
       : NGramShrink<fst::StdArc>(infst, shrink_opt, tot_uni, backoff_label,
-                                     norm_eps, check_consistency),
+                                 norm_eps, check_consistency),
         theta_(theta) {}
 
   // Shrink n-gram model, based on initialized parameters (requires normalized).

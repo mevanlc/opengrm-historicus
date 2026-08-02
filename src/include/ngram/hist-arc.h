@@ -31,8 +31,7 @@ namespace ngram {
 constexpr size_t kHistogramBins = 7;
 
 // HistogramArc is the Cartesian product of kHistogramBins StdArcs.
-struct HistogramArc
-    : public fst::PowerArc<fst::StdArc, kHistogramBins> {
+struct HistogramArc : public fst::PowerArc<fst::StdArc, kHistogramBins> {
   using Base = fst::PowerArc<fst::StdArc, ::ngram::kHistogramBins>;
 
   using Base::Base;

@@ -99,8 +99,7 @@ class NGramCounter {
     if (fst->Properties(fst::kString, true) == fst::kString) {
       return CountFromStringFst(*fst);
     }
-    if (fst->Properties(fst::kCoAccessible, true) !=
-        fst::kCoAccessible) {
+    if (fst->Properties(fst::kCoAccessible, true) != fst::kCoAccessible) {
       LOG(WARNING) << "NGramCounter::Count: input FST is not coaccessible";
       fst::Connect(fst);
       // The FSA could be fully coinaccessible.
@@ -218,7 +217,7 @@ class NGramCounter {
 
   // Adds count to the unigram count of all symbols in the symbol table.
   void AddCountToSymbolUnigrams(const fst::SymbolTable &syms,
-                                       Weight neg_log_count) {
+                                Weight neg_log_count) {
     for (const auto &sitem : syms) {
       if (sitem.Label() == 0) {
         // If label == 0, updates final cost of unigram state.
@@ -402,8 +401,7 @@ class NGramCounter {
 
 template <class Weight, class Label>
 template <class Arc>
-bool NGramCounter<Weight, Label>::CountFromStringFst(
-    const fst::Fst<Arc> &fst) {
+bool NGramCounter<Weight, Label>::CountFromStringFst(const fst::Fst<Arc> &fst) {
   if (!fst.Properties(fst::kString, false)) {
     NGRAMERROR() << "Input FST is not a string";
     return false;
@@ -462,8 +460,8 @@ bool NGramCounter<Weight, Label>::CountFromTopSortedFst(
     pair2weight.erase(current_pair);
     heap.pop_back();
     ++i;
-    for (fst::ArcIterator<fst::Fst<Arc>> aiter(fst, fst_state);
-         !aiter.Done(); aiter.Next()) {
+    for (fst::ArcIterator<fst::Fst<Arc>> aiter(fst, fst_state); !aiter.Done();
+         aiter.Next()) {
       const auto &arc = aiter.Value();
       Pair next_pair(arc.nextstate, count_state);
       if (arc.ilabel) {
@@ -516,9 +514,8 @@ bool GetNGramHistograms(fst::FarReader<fst::StdArc> *far_reader,
 
 // Computes count-of-counts.
 template <class Arc>
-void GetNGramCountOfCounts(const fst::Fst<Arc> &fst,
-                           fst::StdMutableFst *ccfst, int in_order,
-                           std::string_view context_pattern) {
+void GetNGramCountOfCounts(const fst::Fst<Arc> &fst, fst::StdMutableFst *ccfst,
+                           int in_order, std::string_view context_pattern) {
   NGramModel<Arc> ngram(fst, 0, kNormEps, !context_pattern.empty());
   const auto order = ngram.HiOrder() > in_order ? ngram.HiOrder() : in_order;
   NGramCountOfCounts<Arc> count_of_counts(context_pattern, order);

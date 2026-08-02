@@ -148,8 +148,8 @@ void NGramSplit<Arc>::SplitNGramModel(const fst::Fst<Arc> &fst) {
     for (StateId state = 0; state < model_.NumStates(); ++state) {
       if (model_.StateOrder(state) != order) continue;
       // Second get more splits from ascending arcs.
-      for (fst::ArcIterator<fst::Fst<Arc>> aiter(fst, state);
-           !aiter.Done(); aiter.Next()) {
+      for (fst::ArcIterator<fst::Fst<Arc>> aiter(fst, state); !aiter.Done();
+           aiter.Next()) {
         const Arc &arc = aiter.Value();
         if (model_.StateOrder(arc.nextstate) != model_.StateOrder(state) + 1)
           continue;
@@ -227,8 +227,8 @@ void NGramSplit<Arc>::CreateSplitFst(const fst::Fst<Arc> &fst,
     bool in_context =
         contexts_[context_idx]->HasContext(ngram, include_all_suffixes_);
 
-    for (fst::ArcIterator<fst::Fst<Arc>> aiter(fst, state);
-         !aiter.Done(); aiter.Next()) {
+    for (fst::ArcIterator<fst::Fst<Arc>> aiter(fst, state); !aiter.Done();
+         aiter.Next()) {
       const Arc &arc = aiter.Value();
       if (arc.ilabel == model_.BackoffLabel()) continue;
       StateId nextstate = arc.nextstate;

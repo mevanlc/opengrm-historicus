@@ -50,8 +50,7 @@ class NGramBayesModelMerge : public NGramMerge<fst::StdArc> {
 
   // Perform smooth-model merge with n-gram model specified by the FST argument
   // and mixing weights alpha and beta. Resultant model will be normalized.
-  void MergeNGramModels(const fst::StdFst &infst2, double alpha,
-                        double beta) {
+  void MergeNGramModels(const fst::StdFst &infst2, double alpha, double beta) {
     NGramModel<fst::StdArc> mod2(infst2);
     if (!mod2.CheckNormalization()) {
       NGRAMERROR() << "NGramBayesModelMerge: Model 2 must be normalized to"
@@ -71,9 +70,9 @@ class NGramBayesModelMerge : public NGramMerge<fst::StdArc> {
  protected:
   // Specifies resultant weight when combining a weight from each FST
   fst::StdArc::Weight MergeWeights(StateId s1, StateId s2, Label label,
-                                       fst::StdArc::Weight w1,
-                                       fst::StdArc::Weight w2, bool in_fst1,
-                                       bool in_fst2) const override {
+                                   fst::StdArc::Weight w1,
+                                   fst::StdArc::Weight w2, bool in_fst1,
+                                   bool in_fst2) const override {
     if (label == BackoffLabel()) {  // don't modify (needed) backoff weights
       return in_fst1 ? w1.Value() : w2.Value();
     } else {

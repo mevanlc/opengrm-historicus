@@ -59,16 +59,16 @@ bool NGramShrinkModel(fst::StdMutableFst *fst, const std::string &method,
                       fst::StdArc::Label backoff_label, double norm_eps,
                       bool check_consistency) {
   return NGramShrinkModel(
-      fst, method, std::set<std::vector<fst::StdArc::Label>>(), tot_uni,
-      theta, target_num, min_order, count_pattern, context_pattern, shrink_opt,
+      fst, method, std::set<std::vector<fst::StdArc::Label>>(), tot_uni, theta,
+      target_num, min_order, count_pattern, context_pattern, shrink_opt,
       backoff_label, norm_eps, check_consistency);
 }
 
 // Makes model from NGram model FST with StdArc counts.
 bool NGramShrinkModel(
     fst::StdMutableFst *fst, const std::string &method,
-    const std::set<std::vector<fst::StdArc::Label>> &ngram_list,
-    double tot_uni, double theta, int64_t target_num, int32_t min_order,
+    const std::set<std::vector<fst::StdArc::Label>> &ngram_list, double tot_uni,
+    double theta, int64_t target_num, int32_t min_order,
     const std::string &count_pattern, std::string_view context_pattern,
     int shrink_opt, fst::StdArc::Label backoff_label, double norm_eps,
     bool check_consistency) {

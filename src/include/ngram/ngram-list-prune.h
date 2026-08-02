@@ -98,8 +98,7 @@ class NGramListPrune : public NGramShrink<fst::StdArc> {
   // order.
   void InitializeStateVectors() {
     state_on_prune_path_.resize(GetMutableFst()->NumStates(), false);
-    fst::Matcher<fst::Fst<fst::StdArc>> matcher(
-        GetFst(), fst::MATCH_INPUT);
+    fst::Matcher<fst::Fst<fst::StdArc>> matcher(GetFst(), fst::MATCH_INPUT);
     for (auto ngram : ngrams_to_prune_) {
       StateId origin_state = fst::kNoStateId;
       StateId curr_state =
@@ -154,8 +153,8 @@ class NGramListPrune : public NGramShrink<fst::StdArc> {
     }
     for (int order = 1; order <= HiOrder(); ++order) {
       for (auto s : order_states[order]) {
-        fst::ArcIterator<fst::ExpandedFst<fst::StdArc>> aiter(
-            GetExpandedFst(), s);
+        fst::ArcIterator<fst::ExpandedFst<fst::StdArc>> aiter(GetExpandedFst(),
+                                                              s);
         fst::StdArc arc = aiter.Value();
         if (arc.ilabel == 0) {
           StateId backoff_state = arc.nextstate;
@@ -218,11 +217,10 @@ class NGramListPrune : public NGramShrink<fst::StdArc> {
 };
 
 // Given a vector of ngram strings, adds vector of ngram labels to set.
-void GetNGramListToPrune(
-    const std::vector<std::string> &ngrams_to_prune,
-    const fst::SymbolTable *syms,
-    std::set<std::vector<fst::StdArc::Label>> *ngram_list,
-    bool retry_downcase = false);
+void GetNGramListToPrune(const std::vector<std::string> &ngrams_to_prune,
+                         const fst::SymbolTable *syms,
+                         std::set<std::vector<fst::StdArc::Label>> *ngram_list,
+                         bool retry_downcase = false);
 
 }  // namespace ngram
 

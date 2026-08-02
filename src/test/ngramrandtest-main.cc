@@ -17,7 +17,9 @@
 // FST where epsilons are treated as failure transitions.
 
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -78,7 +80,7 @@ void BuildRandomUnigram(fst::StdMutableFst *unigram, int vocabulary_max,
   double mean_sent_length =
       mean_length * (rand() / (RAND_MAX + 1.0));  // NOLINT
   BuildContexts(0, vocabulary + 1, vocabulary + 1, cntxstrm);
-  fst::SymbolTable syms;               // dummy symbol table
+  fst::SymbolTable syms;                   // dummy symbol table
   syms.AddSymbol("0");                     // add to dummy symbol table
   unigram->SetStart(unigram->AddState());  // single state automaton
   double C = 0, counts = -log(C);
@@ -122,9 +124,8 @@ std::string far_name(int32_t far_num) {
 }
 
 // Adds Fst to FAR archive file
-inline void AddToFar(fst::MutableFst<fst::StdArc> *stringfst,
-                     int key_size, int stringkey,
-                     fst::FarWriter<fst::StdArc> *far_writer) {
+inline void AddToFar(fst::MutableFst<fst::StdArc> *stringfst, int key_size,
+                     int stringkey, fst::FarWriter<fst::StdArc> *far_writer) {
   std::ostringstream keybuf;
   keybuf.width(key_size);
   keybuf.fill('0');
@@ -133,11 +134,9 @@ inline void AddToFar(fst::MutableFst<fst::StdArc> *stringfst,
 }
 
 // using an input model, generate a random corpus and count n-grams
-int CountFromRandGen(fst::StdMutableFst *genmodel,
-                     fst::StdMutableFst *countfst,
+int CountFromRandGen(fst::StdMutableFst *genmodel, fst::StdMutableFst *countfst,
                      ngram::NGramArcSelector<fst::StdArc> *selector,
-                     int num_strings,
-                     fst::FarWriter<fst::StdArc> *far_writer0,
+                     int num_strings, fst::FarWriter<fst::StdArc> *far_writer0,
                      int in_far_num, int max_length, int ngram_max,
                      const std::string &directory, bool first,
                      std::ostream &varstrm) {
@@ -157,7 +156,7 @@ int CountFromRandGen(fst::StdMutableFst *genmodel,
     fst::StdVectorFst ofst;
     while (ofst.NumStates() == 0)  // counting only non-empty strings
       fst::RandGen(*genmodel, &ofst,
-                       opts);   // Randomly generate one string from model
+                   opts);       // Randomly generate one string from model
     ngram_counter.Count(ofst);  // Count n-grams of random order
     if (stringidx == 1 || (rand() / (RAND_MAX + 1.0)) < shard_prob) {  // NOLINT
       far_writer1.reset(fst::FarWriter<fst::StdArc>::Create(
@@ -190,7 +189,7 @@ fst::StdMutableFst *RandomMake(fst::StdMutableFst *countfst) {
     return ngram.GetMutableFst();
   } else if (switchval == 3) {
     ngram::NGramKatz<fst::StdArc> ngram(countfst, false, 0, ngram::kNormEps,
-                                            true, -1);
+                                        true, -1);
     ngram.MakeNGramModel();
     return ngram.GetMutableFst();
   } else {
@@ -234,8 +233,7 @@ int ngramrandtest_main(int argc, char **argv) {
   std::ostream &cntxstrm = cntxfstrm;
   fst::FarType far_type = fst::FarType::STLIST;
   std::unique_ptr<fst::FarWriter<fst::StdArc>> far_writer(
-      fst::FarWriter<fst::StdArc>::Create(directory + "tocount.far",
-                                                  far_type));
+      fst::FarWriter<fst::StdArc>::Create(directory + "tocount.far", far_type));
   ngram::NGramArcSelector<fst::StdArc> selector(FST_FLAGS_seed);
   // rand burn in, for improved randomness;
   for (int i = 0; i < 10; i++) rand();  // NOLINT
@@ -252,8 +250,7 @@ int ngramrandtest_main(int argc, char **argv) {
       FST_FLAGS_max_length, FST_FLAGS_ngram_max,
       directory, true, varstrm);
   // copy first count file, since making model modifies input counts
-  fst::StdMutableFst *modfst1 =
-      RandomMake(&countfst1);  // model from counts
+  fst::StdMutableFst *modfst1 = RandomMake(&countfst1);  // model from counts
 
   fst::StdVectorFst countfst2;  // n-gram counts from 2nd random corpus
   CountFromRandGen(modfst1, &countfst2, &selector, num_strings,

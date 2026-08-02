@@ -40,9 +40,8 @@ class NGramTransfer {
   typedef typename Arc::Weight Weight;
 
   // Ctr for transfer from source FST(s) to this ctr FST.
-  NGramTransfer(fst::MutableFst<Arc> *fst,
-                std::string_view context_pattern, Label backoff_label = 0,
-                double norm_eps = kNormEps)
+  NGramTransfer(fst::MutableFst<Arc> *fst, std::string_view context_pattern,
+                Label backoff_label = 0, double norm_eps = kNormEps)
       : transfer_from_(true), error_(false) {
     InitDest(fst, context_pattern, backoff_label, norm_eps);
   }
@@ -103,8 +102,8 @@ class NGramTransfer {
   void InitSrc(const fst::Fst<Arc> &fst, std::string_view context_pattern,
                Label backoff_label, double norm_eps) {
     src_fst_.reset(fst.Copy());
-    src_matcher_.reset(new fst::Matcher<fst::Fst<Arc>>(
-        *src_fst_, fst::MATCH_INPUT));
+    src_matcher_.reset(
+        new fst::Matcher<fst::Fst<Arc>>(*src_fst_, fst::MATCH_INPUT));
     src_model_.reset(
         new NGramModel<Arc>(*src_fst_, backoff_label, norm_eps, true));
     src_context_ =
@@ -112,9 +111,8 @@ class NGramTransfer {
     if (src_model_->Error()) SetError();
   }
 
-  void InitDest(fst::MutableFst<Arc> *fst,
-                std::string_view context_pattern, Label backoff_label,
-                double norm_eps) {
+  void InitDest(fst::MutableFst<Arc> *fst, std::string_view context_pattern,
+                Label backoff_label, double norm_eps) {
     dest_fst_ = fst;
     dest_model_.reset(
         new NGramMutableModel<Arc>(dest_fst_, backoff_label, norm_eps,
@@ -152,9 +150,8 @@ typename Arc::StateId NGramTransfer<Arc>::FindNextState(StateId s,
   fst::Matcher<fst::Fst<Arc>> matcher(*dest_fst_, fst::MATCH_INPUT);
   matcher.SetState(s);
   StateId bs = s;
-  Label find_backoff_label = src_model_->BackoffLabel()
-                                 ? src_model_->BackoffLabel()
-                                 : fst::kNoLabel;
+  Label find_backoff_label =
+      src_model_->BackoffLabel() ? src_model_->BackoffLabel() : fst::kNoLabel;
   bool found = false;
   do {
     if (matcher.Find(find_backoff_label))
@@ -193,8 +190,8 @@ bool NGramTransfer<Arc>::TransferNGrams() const {
 
       // (1) if both ascending, set states[d] = dp
       src_matcher_->SetState(s);
-      for (fst::ArcIterator<fst::Fst<Arc>> aiter(*dest_fst_, sp);
-           !aiter.Done(); aiter.Next()) {
+      for (fst::ArcIterator<fst::Fst<Arc>> aiter(*dest_fst_, sp); !aiter.Done();
+           aiter.Next()) {
         const Arc &arc = aiter.Value();
         if (arc.ilabel == dest_model_->BackoffLabel()) continue;
         if (dest_model_->StateOrder(arc.nextstate) <=
@@ -221,8 +218,8 @@ bool NGramTransfer<Arc>::TransferNGrams() const {
       }
 
       std::map<Label, Arc> arcs;
-      for (fst::ArcIterator<fst::Fst<Arc>> aiter(*dest_fst_, sp);
-           !aiter.Done(); aiter.Next()) {
+      for (fst::ArcIterator<fst::Fst<Arc>> aiter(*dest_fst_, sp); !aiter.Done();
+           aiter.Next()) {
         const Arc &arc = aiter.Value();
         arcs[arc.ilabel] = arc;
       }
@@ -232,8 +229,8 @@ bool NGramTransfer<Arc>::TransferNGrams() const {
       bool add_missing =
           dest_context_->HasContext(src_model_->StateNGram(s), true);
 
-      for (fst::ArcIterator<fst::Fst<Arc>> aiter(*src_fst_, s);
-           !aiter.Done(); aiter.Next()) {
+      for (fst::ArcIterator<fst::Fst<Arc>> aiter(*src_fst_, s); !aiter.Done();
+           aiter.Next()) {
         const Arc &arc = aiter.Value();
         auto iter = arcs.find(arc.ilabel);
         if (iter != arcs.end()) {

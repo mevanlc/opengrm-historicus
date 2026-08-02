@@ -52,9 +52,9 @@ class NGramMutableModel : public NGramModel<Arc> {
   // Constructs an NGramMutableModel object, derived from NGramModel,
   // that adds mutable methods such as backoff normalization.
   // Ownership of the FST is retained by the caller.
-  explicit NGramMutableModel(fst::MutableFst<Arc> *infst,
-                             Label backoff_label, double norm_eps,
-                             bool state_ngrams, bool infinite_backoff = false)
+  explicit NGramMutableModel(fst::MutableFst<Arc> *infst, Label backoff_label,
+                             double norm_eps, bool state_ngrams,
+                             bool infinite_backoff = false)
       : NGramModel<Arc>(*infst, backoff_label, norm_eps, state_ngrams),
         infinite_backoff_(infinite_backoff),
         mutable_fst_(infst) {}
@@ -72,9 +72,7 @@ class NGramMutableModel : public NGramModel<Arc> {
         mutable_fst_(infst) {}
 
   // ExpandedFst const reference
-  const fst::ExpandedFst<Arc> &GetExpandedFst() const {
-    return *mutable_fst_;
-  }
+  const fst::ExpandedFst<Arc> &GetExpandedFst() const { return *mutable_fst_; }
 
   // Mutable Fst pointer
   fst::MutableFst<Arc> *GetMutableFst() { return mutable_fst_; }
@@ -147,9 +145,8 @@ class NGramMutableModel : public NGramModel<Arc> {
   // Uses iterator in place of matcher for mutable arc iterators,
   // avoids full copy and allows getting Position(). NB: begins
   // search from current position.
-  bool FindMutableArc(
-      fst::MutableArcIterator<fst::MutableFst<Arc>> *biter,
-      Label label) const {
+  bool FindMutableArc(fst::MutableArcIterator<fst::MutableFst<Arc>> *biter,
+                      Label label) const {
     while (!biter->Done()) {  // scan through arcs
       Arc barc = biter->Value();
       if (barc.ilabel == label)
@@ -167,8 +164,7 @@ class NGramMutableModel : public NGramModel<Arc> {
     if (mutable_fst_->Final(st) != Arc::Weight::Zero()) {
       mutable_fst_->SetFinal(st, ScaleWeight(mutable_fst_->Final(st), scale));
     }
-    for (fst::MutableArcIterator<fst::MutableFst<Arc>> aiter(
-             mutable_fst_, st);
+    for (fst::MutableArcIterator<fst::MutableFst<Arc>> aiter(mutable_fst_, st);
          !aiter.Done(); aiter.Next()) {
       Arc arc = aiter.Value();
       if (arc.ilabel != BackoffLabel()) {  // only scaling non-backoff arcs
@@ -195,8 +191,7 @@ class NGramMutableModel : public NGramModel<Arc> {
     for (StateId st = 0; st < mutable_fst_->NumStates(); ++st) {
       double hi_neglog_sum, low_neglog_sum;
       if (CalcBONegLogSums(st, &hi_neglog_sum, &low_neglog_sum)) {
-        fst::MutableArcIterator<fst::MutableFst<Arc>> aiter(
-            mutable_fst_, st);
+        fst::MutableArcIterator<fst::MutableFst<Arc>> aiter(mutable_fst_, st);
         if (FindMutableArc(&aiter, BackoffLabel())) {
           Arc arc = aiter.Value();
           SetScalarValue(&arc.weight, -log(1 - exp(-hi_neglog_sum)));
@@ -218,8 +213,7 @@ class NGramMutableModel : public NGramModel<Arc> {
     double alpha =
         CalculateBackoffCost(hi_neglog_sum, low_neglog_sum, infinite_backoff_);
     AdjustCompleteStates(st, &alpha);
-    fst::MutableArcIterator<fst::MutableFst<Arc>> aiter(mutable_fst_,
-                                                                st);
+    fst::MutableArcIterator<fst::MutableFst<Arc>> aiter(mutable_fst_, st);
     if (FindMutableArc(&aiter, BackoffLabel())) {
       Arc arc = aiter.Value();
       SetScalarValue(&arc.weight, alpha);
@@ -241,8 +235,7 @@ class NGramMutableModel : public NGramModel<Arc> {
   void UnSumState(StateId st) {
     Weight bocost;
     StateId bo = GetBackoff(st, &bocost);
-    for (fst::MutableArcIterator<fst::MutableFst<Arc>> aiter(
-             mutable_fst_, st);
+    for (fst::MutableArcIterator<fst::MutableFst<Arc>> aiter(mutable_fst_, st);
          !aiter.Done(); aiter.Next()) {
       Arc arc = aiter.Value();
       if (arc.ilabel == BackoffLabel()) continue;

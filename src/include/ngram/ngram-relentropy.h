@@ -27,12 +27,11 @@ class NGramRelEntropy : public NGramShrink<fst::StdArc> {
  public:
   // Constructs an NGramRelEntropy object that prunes an LM using relative
   // entropy criterion.
-  NGramRelEntropy(fst::StdMutableFst *infst, double theta,
-                  int shrink_opt = 0, double tot_uni = -1.0,
-                  Label backoff_label = 0, double norm_eps = kNormEps,
-                  bool check_consistency = false)
+  NGramRelEntropy(fst::StdMutableFst *infst, double theta, int shrink_opt = 0,
+                  double tot_uni = -1.0, Label backoff_label = 0,
+                  double norm_eps = kNormEps, bool check_consistency = false)
       : NGramShrink<fst::StdArc>(infst, shrink_opt, tot_uni, backoff_label,
-                                     norm_eps, check_consistency) {
+                                 norm_eps, check_consistency) {
     // Threshold provided in real domain, convert to log
     theta_ = log(theta + 1);  // e^D - 1 <= theta_ -> D <= log(theta_ + 1)
   }

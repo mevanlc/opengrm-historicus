@@ -42,9 +42,9 @@ using ::fst::StdMutableFst;
 
 // Makes models from NGram count FSTs with StdArc counts.
 bool NGramMakeModel(fst::StdMutableFst *fst, const std::string &method,
-                    const fst::StdFst *ccfst, bool backoff,
-                    bool interpolate, int64_t bins, double witten_bell_k,
-                    double discount_D, int64_t backoff_label, double norm_eps,
+                    const fst::StdFst *ccfst, bool backoff, bool interpolate,
+                    int64_t bins, double witten_bell_k, double discount_D,
+                    int64_t backoff_label, double norm_eps,
                     bool check_consistency) {
   if (backoff && interpolate) {
     // Checks that these parameters make sense.  If both are false, defaults
@@ -72,7 +72,7 @@ bool NGramMakeModel(fst::StdMutableFst *fst, const std::string &method,
     }
   } else if (method == "katz") {
     ngram::NGramKatz<fst::StdArc> ngram(fst, !interpolate, backoff_label,
-                                            norm_eps, check_consistency, bins);
+                                        norm_eps, check_consistency, bins);
     if (ccfst) ngram.SetCountOfCounts(*ccfst);
     if (!ngram.MakeNGramModel()) {
       NGRAMERROR() << "NGramKatz: failed to make model";
